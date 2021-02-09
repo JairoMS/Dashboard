@@ -32,7 +32,8 @@ function saveBooking(bookingInfo)
   
   var calendar_name = '会議室の予約';
   //var calendar_name = 'アルバイト';
-  var calendars=CalendarApp.subscribeToCalendar(calendar_name);
+  const meetingCal=Calendar.Calendars.get(calendar_name)
+  var calendars=CalendarApp.subscribeToCalendar(meetingCal.id);
   //var calendars = CalendarApp.getCalendarsByName(calendar_name);
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);

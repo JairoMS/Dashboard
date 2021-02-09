@@ -1,0 +1,79 @@
+<!--Java Scrips functions-->
+<script>
+  function edit_button(buttonId)
+  { 
+    var remove_list = ["status", "note", "btnSave"];
+    var set_list = ["statusT", "noteT", "btn"];
+
+    for (var i = 0; i < remove_list.length; i++)
+    {
+      document.getElementById(remove_list[i]+ buttonId[3]).removeAttribute("hidden");
+      document.getElementById(set_list[i]+ buttonId[3]).setAttribute("hidden","true");
+    }
+    
+  }
+
+  function save_button(buttonId)
+  { 
+    var info = {};
+    info.row = buttonId[7];
+    if ( document.getElementById("status"+ buttonId[7]).value == "no_selec")
+    {
+      info.status = document.getElementById("statusT"+ buttonId[7]).innerHTML;
+    }
+    else
+    {
+      info.status = document.getElementById("status"+ buttonId[7]).value;
+    }
+    
+    info.note = document.getElementById("note"+ buttonId[7]).value;
+
+    var remove_list = ["statusT", "noteT", "btn"];
+    var set_list = ["status", "note", "btnSave"]; 
+
+    for (var i = 0; i < remove_list.length; i++)
+    {
+      document.getElementById(remove_list[i]+ buttonId[7]).removeAttribute("hidden");
+      document.getElementById(set_list[i]+ buttonId[7]).setAttribute("hidden","true");
+    }
+
+    document.getElementById("statusT"+ buttonId[7]).innerHTML = info.status;
+    document.getElementById("noteT"+ buttonId[7]).innerHTML = info.note;
+    
+    google.script.run.saveUser(info); 
+  }
+
+  function booking(buttonId)
+  {
+    document.getElementById("calendar"+ buttonId[10]).removeAttribute("hidden");
+    document.getElementById("buttonBook"+ buttonId[10]).setAttribute("hidden","true");
+  }
+
+  function save_booking(buttonId)
+  {
+    var bookingInfo = {};
+    document.getElementById("calendar"+ buttonId[11]).setAttribute("hidden","true");
+    document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
+    document.getElementById("deleteBooking"+ buttonId[11]).removeAttribute("hidden");
+
+    bookingInfo.row = buttonId[11];
+    bookingInfo.name = document.getElementById("name"+ buttonId[11]).innerHTML;
+
+    bookingInfo.date = document.getElementById("Date"+ buttonId[11]).value;
+    bookingInfo.startTime = document.getElementById("StartTime"+ buttonId[11]).value;
+    bookingInfo.finishTime = document.getElementById("FinishTime"+ buttonId[11]).value;
+    
+    document.getElementById("calendarT"+ buttonId[11]).innerHTML = bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime;
+
+    google.script.run.saveBooking(bookingInfo);
+  }
+
+  function delete_booking(buttonId)
+  {
+    document.getElementById("buttonBook"+ buttonId[13]).removeAttribute("hidden");
+    document.getElementById("calendarT"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
+
+    google.script.run.deleteBooking(buttonId[13]);
+  }
+</script>

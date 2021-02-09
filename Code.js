@@ -31,9 +31,17 @@ function saveBooking(bookingInfo)
   sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
   
   var calendar_name = '会議室の予約';
+  var calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com'
   //var calendar_name = 'アルバイト';
-  const meetingCal=Calendar.Calendars.get(calendar_name)
-  var calendars=CalendarApp.subscribeToCalendar(meetingCal.id);
+
+  /*var meetingCal=Calendar.Calendars.get(calendar_id)
+
+  for (const prop in meetingCal){
+    Logger.log(`${prop}: ${meetingCal[prop]}`);
+  }
+  */
+ 
+  var calendars=CalendarApp.subscribeToCalendar(calendar_id);
   //var calendars = CalendarApp.getCalendarsByName(calendar_name);
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);

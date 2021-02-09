@@ -1,4 +1,5 @@
 var meeting_calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
+var arubaito_calendar_id= 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
 
 function doGet(e) 
 {
@@ -76,11 +77,13 @@ function data_from_ss()
 
 function read_calendar()
 {
-  var calendar_name = 'アルバイト';  
+  var calendar_name=CalendarApp.subscribeToCalendar(arubaito_calendar_id).getName()
+  //var calendar_name = 'アルバイト';  
   var today = new Date();
-  var calendar = CalendarApp.getCalendarsByName(calendar_name)[0].getEventsForDay(today);
+  var calendar=CalendarApp.getCalendarsByName(calendar_name);
+  var calendarEvent = calendar[0].getEventsForDay(today);
   
-  if (calendar.length == 0)
+  if (calendarEvent.length == 0)
   {
     return;
   }
@@ -91,14 +94,15 @@ function read_calendar()
 
   list = sheet.getSheetValues(2, 2, sheet.getLastRow()-1, 1);
 
-  for (var i = 0 ; i < calendar.length ; i++ )
+  for (var i = 0 ; i < calendarEvent.length ; i++ )
   {
-    var st = Utilities.formatDate(calendar[i].getStartTime(), "GMT+9", "HH:mm");
-    var et = Utilities.formatDate(calendar[i].getEndTime(), "GMT+9", "HH:mm");
-    var cell_id = "E"+find_name(list, calendar[i].getTitle())
+    var st = Utilities.formatDate(calendarEvent[i].getStartTime(), "GMT+9", "HH:mm");
+    var et = Utilities.formatDate(calendarEvent[i].getEndTime(), "GMT+9", "HH:mm");
+    var cell_id = "E"+find_name(list, calendarEvent[i].getTitle())
     sheet.getRange(cell_id).setValue(calendar_name + " " + st + " - " + et);
     
   }
+  calendar[0].unsubscribeFromCalendar()
 }
 
 function read_calendar2(){

@@ -1,3 +1,5 @@
+var meeting_calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
+
 function doGet(e) 
 {
   read_calendar();
@@ -30,25 +32,14 @@ function saveBooking(bookingInfo)
   var cell_bookingId = "G" + (parseInt(bookingInfo.row)+1).toString();
   sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
   
-  var calendar_name = '会議室の予約';
-  var calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com'
-  //var calendar_name = 'アルバイト';
 
-  /*var meetingCal=Calendar.Calendars.get(calendar_id)
-
-  for (const prop in meetingCal){
-    Logger.log(`${prop}: ${meetingCal[prop]}`);
-  }
-  */
- 
-  var calendars=CalendarApp.subscribeToCalendar(calendar_id);
-  //var calendars = CalendarApp.getCalendarsByName(calendar_name);
+  //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
+  var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
-  Logger.log('right here')
-  const eventsToday = calendars[0].createEvent(calendar_name +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));
+  const eventsToday = calendars[0].createEvent(subCal.getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作成する / Create Event
   sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
-  calendars.unsubscribeFromCalendar()
+  calendars[0].unsubscribeFromCalendar() //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
   
 }
 
@@ -63,10 +54,12 @@ function deleteBooking(row)
   sheet.getRange(cell_booking).setValue("");
   sheet.getRange(cell_bookingId).setValue("");
 
-  //var calendar_name = '会議室の予約';
-  var calendar_name = 'アルバイト';
-  var event = CalendarApp.getCalendarsByName(calendar_name)[0].getEventById(event_id);
+    //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
+  var meeting_calendar=CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
+  var event = meeting_calendar[0].getEventById(event_id);
   event.deleteEvent();
+  //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
+  meeting_calendar[0].unsubscribeFromCalendar();
   Logger.log(event);
 }
 

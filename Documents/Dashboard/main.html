@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Including css style-->
+    <?!= include("page-css"); ?>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <? var datass = data_from_ss(); ?>
+    <h2>ダッシュボード・シルク・ラボラトリ</h2>
+    <table style="width:90%">
+      <!--Headers-->
+      <tr>
+        <th style="width:5%"></th>            
+        <th style="width:10%">氏名</th>       
+        <th style="width:10%">状態</th>
+        <th style="width:25%">メモ</th>
+        <th style="width:20%">スケジュール</th>
+        <th style="width:10%"></th> <!--Edit/Save button-->
+        <th style="width:20%">会議室</th>
+      </tr>
+      <? for (var i = 0 ; i < datass.length ; i++){?>
+      <!--Person info-->
+      <tr>
+        <!--Number-->
+        <td><?= i+1 ?></td>
+        <!--Name-->
+        <td> 
+          <p id = "<?= "name"+(i+1).toString()?>"> <?= datass[i][0]?> </p>
+        </td>
+        <td>
+          <!--Status list-->
+          <select id="<?= "status"+(i+1).toString()?>" hidden>
+            <option value="no_selec"></option>
+            <option value="出社">出社</option>
+            <option value="外出">外出</option>
+            <option value="帰宅">帰宅</option>
+            <option value="直行">直行</option>
+            <option value="直帰">直帰</option>
+            <option value="食事">食事</option>
+            <option value="休み">休み</option>
+            <option value="自宅作業">自宅作業</option>
+          </select>
+          <p id = "<?= "statusT"+(i+1).toString()?>"> <?= datass[i][1]?> </p>
+        </td>
+        <!--Note-->
+        <td>
+          <input type="text" id="<?= "note"+(i+1).toString()?>" value = "<?= datass[i][2]?>" hidden>
+          <p id = "<?= "noteT"+(i+1).toString()?>"><?= datass[i][2]?></p>
+        </td>
+        <!--Schedule-->
+        <td>
+          <p id = "<?= "schedule"+(i+1).toString()?>"><?!= datass[i][3]?></p>
+        </td>
+        <td>
+          <button id="<?= "btn"+(i+1).toString()?>" onclick="edit_button(this.id)"> 編集 </button>
+          <button id="<?= "btnSave"+(i+1).toString()?>" onclick="save_button(this.id)" hidden> 保存 </button>
+        </td> 
+        <td>
+          <button id="<?= "buttonBook"+(i+1).toString()?>" onclick="booking(this.id)"> 予約 </button>
+          <div id= "<?= "calendar"+(i+1).toString()?>" hidden> 
+            <label>日付: </label>    <input type = "date" id="<?= "Date"+(i+1).toString()?>"><br>
+            <label>開始時刻: </label> <input type = "time" id="<?= "StartTime"+(i+1).toString()?>"><br>
+            <label>終了時刻: </label> <input type = "time" id="<?= "FinishTime"+(i+1).toString()?>"><br>
+            <button id="<?= "saveBooking"+(i+1).toString()?>" onclick="save_booking(this.id)"> 保存 </button>
+          </div>
+          <p id="<?= "calendarT"+(i+1).toString()?>" hidden></p> 
+          <button id="<?= "deleteBooking"+(i+1).toString()?>" onclick="delete_booking(this.id)" hidden> 削除 </button>
+        </td> 
+      </tr>
+      <? } ?>  
+    </table>
+    <!-- Including Java Script functions-->
+    <?!= include("page-js"); ?>
+  </body>
+</html>

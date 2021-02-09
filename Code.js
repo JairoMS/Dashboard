@@ -30,15 +30,16 @@ function saveBooking(bookingInfo)
   var cell_bookingId = "G" + (parseInt(bookingInfo.row)+1).toString();
   sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
   
-  //var calendar_name = '会議室の予約';
-  var calendar_name = 'アルバイト';
-  var calendars = CalendarApp.getCalendarsByName(calendar_name);
+  var calendar_name = '会議室の予約';
+  //var calendar_name = 'アルバイト';
+  var calendars=CalendarApp.subscribeToCalendar(calendar_name);
+  //var calendars = CalendarApp.getCalendarsByName(calendar_name);
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
-
   Logger.log('right here')
-  event = calendars[0].createEvent(calendar_name +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));
-  sheet.getRange(cell_bookingId).setValue(event.getId());
+  const eventsToday = calendars[0].createEvent(calendar_name +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));
+  sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
+  calendars.unsubscribeFromCalendar()
   
 }
 

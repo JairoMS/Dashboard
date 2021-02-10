@@ -154,7 +154,7 @@ function read_calendar2()
         if(eventToday.length>0)
         { 
           var cell_id = "E"+(i+2);
-          var string_events = sheet.getRange(cell_id).getValues()+"\n";  
+          var string_events = "";  
           for (var j = 0 ; j<eventToday.length ; j++)
           {
             // Logger.log(eventToday.length);

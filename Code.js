@@ -1,6 +1,9 @@
+var meeting_calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
+var arubaito_calendar_id= 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
+var reserveDate='nada';
 function doGet(e) 
 {
-  read_calendar();
+  //read_calendar();
   read_calendar2();
   return HtmlService.createTemplateFromFile("main").evaluate();  
 }
@@ -30,16 +33,21 @@ function saveBooking(bookingInfo)
   var cell_bookingId = "G" + (parseInt(bookingInfo.row)+1).toString();
   sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
   
-  // var calendar_name = '会議室の予約';
-  // //var calendar_name = 'アルバイト';
-  // var calendars=CalendarApp.subscribeToCalendar(calendar_name);
-  // //var calendars = CalendarApp.getCalendarsByName(calendar_name);
-  // var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
-  // var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
-  // Logger.log('right here')
-  // const eventsToday = calendars[0].createEvent(calendar_name +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));
-  // sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
-  // calendars.unsubscribeFromCalendar()
+  //try{
+//会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
+  var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
+  var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
+  var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
+  
+  const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作�Eする / Create Event
+  sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
+  calendars[0].unsubscribeFromCalendar() //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
+//}catch(error){
+  //Logger.log(error)
+  //Logger.log(reserveDate) 
+
+
+//}
   
 }
 
@@ -54,10 +62,12 @@ function deleteBooking(row)
   sheet.getRange(cell_booking).setValue("");
   sheet.getRange(cell_bookingId).setValue("");
 
-  //var calendar_name = '会議室の予約';
-  var calendar_name = 'アルバイト';
-  var event = CalendarApp.getCalendarsByName(calendar_name)[0].getEventById(event_id);
+ //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
+  var meeting_calendar=CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
+  var event = meeting_calendar[0].getEventById(event_id);
   event.deleteEvent();
+  //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
+  meeting_calendar[0].unsubscribeFromCalendar();
   Logger.log(event);
 }
 
@@ -83,7 +93,7 @@ function data_from_ss()
 
 function read_calendar()
 {
-  var calendar_name = 'アルバイト';  
+  var calendar_name = 'アルバイチE;  
   // var today = new Date();
   // Use below function to get today date in JST format
   var today = today_jst();

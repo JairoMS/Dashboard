@@ -76,4 +76,12 @@
 
     google.script.run.deleteBooking(buttonId[13]);
   }
+
+  function cancel_booking(buttonId)
+  {
+    document.getElementById("buttonBook"+ buttonId[13]).removeAttribute("hidden");
+    document.getElementById("calendar"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
+    // document.getElementById("cancelBooking"+ buttonId[13]).setAttribute("hidden","true");
+  }
 </script>

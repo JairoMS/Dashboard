@@ -30,15 +30,16 @@ function saveBooking(bookingInfo)
   var cell_bookingId = "G" + (parseInt(bookingInfo.row)+1).toString();
   sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
   
-  //var calendar_name = '会議室の予約';
-  var calendar_name = 'アルバイト';
-  var calendars = CalendarApp.getCalendarsByName(calendar_name);
-  var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
-  var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
-
-  Logger.log('right here')
-  event = calendars[0].createEvent(calendar_name +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));
-  sheet.getRange(cell_bookingId).setValue(event.getId());
+  // var calendar_name = '会議室の予約';
+  // //var calendar_name = 'アルバイト';
+  // var calendars=CalendarApp.subscribeToCalendar(calendar_name);
+  // //var calendars = CalendarApp.getCalendarsByName(calendar_name);
+  // var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
+  // var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
+  // Logger.log('right here')
+  // const eventsToday = calendars[0].createEvent(calendar_name +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));
+  // sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
+  // calendars.unsubscribeFromCalendar()
   
 }
 
@@ -68,13 +69,24 @@ function data_from_ss()
     
     r = sheet.getLastRow();
     c = sheet.getLastColumn();
-    return sheet.getSheetValues(2, 2, r-1, 4);
+    
+    datass = sheet.getSheetValues(2, 2, r-1, 4);
+    for (var i = 0 ; i<datass.length ; i++)
+    {
+      if (datass[i][3]!=="")
+      {
+        datass[i][3] = datass[i][3].replace(/\n/g,"<br>"); // /g all matches
+      } 
+    }
+    return datass;
 }
 
 function read_calendar()
 {
   var calendar_name = 'アルバイト';  
-  var today = new Date();
+  // var today = new Date();
+  // Use below function to get today date in JST format
+  var today = today_jst();
   var calendar = CalendarApp.getCalendarsByName(calendar_name)[0].getEventsForDay(today);
   
   if (calendar.length == 0)
@@ -92,53 +104,73 @@ function read_calendar()
   {
     var st = Utilities.formatDate(calendar[i].getStartTime(), "GMT+9", "HH:mm");
     var et = Utilities.formatDate(calendar[i].getEndTime(), "GMT+9", "HH:mm");
-    var cell_id = "E"+find_name(list, calendar[i].getTitle())
+    var cell_id = "E"+find_name(list, calendar[i].getTitle());
     sheet.getRange(cell_id).setValue(calendar_name + " " + st + " - " + et);
     
   }
 }
 
-function read_calendar2(){
+function read_calendar2()
+{
   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
-  var calendar_names=sheet.getRange("H2:H6").getValues();
-  for(var i=0;i<calendar_names.length;i++){
-    if (calendar_names[i].toString()!==""){
-          var calendar_name = calendar_names[i].toString();
-          var today = new Date();
-          var calendar  =  Calendar.Calendars.get(calendar_name)
-          if(typeof calendar !== 'undefined'){
-            var aCal=CalendarApp.subscribeToCalendar(calendar.id)
-            var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(today);
-            if(eventToday.length>0){
-                eventToday.forEach(theEvent=>{
-                  Logger.log(theEvent.getTitle())
-                  var st = Utilities.formatDate(theEvent.getStartTime(), "GMT+9", "HH:mm");
-                  var et = Utilities.formatDate(theEvent.getEndTime(), "GMT+9", "HH:mm");
-                  var cell_id = "E"+(i+2)
-                  sheet.getRange(cell_id).setValue(aCal.getName() + " " + st + " - " + et);
-                })
-            }
-              
-          }else{
+  var calendar_names=sheet.getRange(2,8,sheet.getLastRow()-1).getValues();
+  // var today = new Date();
+  // Use below function to get today date in JST format
+  var today = today_jst();
+  var email = Session.getActiveUser().getEmail();
+
+  Logger.log(today)
+  for(var i=0 ; i<calendar_names.length ; i++)
+  {
+    if (calendar_names[i].toString()!=="")
+    {
+      var calendar_name = calendar_names[i].toString();
+      
+      var calendar  =  Calendar.Calendars.get(calendar_name);
+      if(typeof calendar !== 'undefined')
+      {
+        if (calendar_name !== email)
+        {
+          var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+          var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(today);
+        }
+        else
+        {
+          var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(today);
+        }
+
+        if(eventToday.length>0)
+        { 
+          var cell_id = "E"+(i+2);
+          var string_events = sheet.getRange(cell_id).getValues()+"\n";  
+          for (var j = 0 ; j<eventToday.length ; j++)
+          {
+            // Logger.log(eventToday.length);
+            var theEvent = eventToday[j];
+            var st = Utilities.formatDate(theEvent.getStartTime(), "GMT+9", "HH:mm");
+            var et = Utilities.formatDate(theEvent.getEndTime(), "GMT+9", "HH:mm");
+            
+            string_events = string_events + theEvent.getTitle() + " " + st + " - " + et + "\n";
+            // Logger.log(string_events);
 
           }
+          sheet.getRange(cell_id).setValue(string_events); 
+        }
+        if (calendar_name !== email)
+        {
+          aCal.unsubscribeFromCalendar();
+        }
           
+      }
+      else
+      {
+      }     
     }
-    
-    
-
   }
+}  
   
-  /*var ownedCal=CalendarApp.getAllCalendars();
-  var today=new Date();
-  for(var i=0;i<ownedCal.length;i++){
-    var calId=ownedCal[i].getName()
-    Logger.log(CalendarApp.getCalendarsByName(calId)[0].getEventsForDay(today))
-  }*/
-}
-
 function find_name(list, name)
 {
   for (var i = 0 ; i < list.length ; i++)
@@ -150,7 +182,37 @@ function find_name(list, name)
   }
 }
 
-// function test()
-// { 
-// }
+function today_jst()
+{ 
+  // By default, new Date() function in Google Apps Script gets the standard time from America/Los_Angeles (Pacific time)  
+  var today = new Date(); 
+  var today_jst = new Date(today.getTime()+1000*60*60*14);
+  Logger.log(today_jst);
+  return today_jst;
+}
 
+function active_user()
+{
+  var email_user = Session.getActiveUser().getEmail();
+  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  var list_email = sheet.getRange(2,8,sheet.getLastRow()-1).getValues();
+  // Logger.log(find_name(list_email,email_user)-1)
+  return find_name(list_email,email_user)-1;
+}
+
+function saving_booking_onEdit(e)
+{
+  Logger.log(e.range.getValue())
+  Logger.log(e.user)
+  Logger.log(e.value)
+}
+
+//// Function to create installable trigger onEdit()
+// function createSpreadsheetOnEditTrigger() 
+// {
+//   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
+//   var ss = SpreadsheetApp.openByUrl(url_ss);
+//   ScriptApp.newTrigger("saving_booking_onEdit").forSpreadsheet(ss).onEdit().create();
+// }

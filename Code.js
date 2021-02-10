@@ -39,7 +39,7 @@ function saveBooking(bookingInfo)
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
   
-  const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作�Eする / Create Event
+  const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作�Eする / Create Event
   sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
   calendars[0].unsubscribeFromCalendar() //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
 //}catch(error){
@@ -93,7 +93,7 @@ function data_from_ss()
 
 function read_calendar()
 {
-  var calendar_name = 'アルバイチE;  
+  var calendar_name = 'アルバイト'  
   // var today = new Date();
   // Use below function to get today date in JST format
   var today = today_jst();

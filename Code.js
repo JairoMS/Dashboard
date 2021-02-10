@@ -1,9 +1,10 @@
 var meeting_calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
 var arubaito_calendar_id= 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
+var reserveDate='nada';
 
 function doGet(e) 
 {
-  read_calendar();
+  //read_calendar();
   read_calendar2();
   return HtmlService.createTemplateFromFile("main").evaluate();  
 }
@@ -33,15 +34,26 @@ function saveBooking(bookingInfo)
   var cell_bookingId = "G" + (parseInt(bookingInfo.row)+1).toString();
   sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
   
-
-  //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
+//try{
+//会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
-  const eventsToday = calendars[0].createEvent(subCal.getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作成する / Create Event
+  
+  const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作成する / Create Event
   sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
   calendars[0].unsubscribeFromCalendar() //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
+//}catch(error){
+  //Logger.log(error)
+  //Logger.log(reserveDate) 
+
+
+//}
   
+}
+
+function GetCurrentProcess(){
+  return reserveDate
 }
 
 function deleteBooking(row)
@@ -78,6 +90,7 @@ function data_from_ss()
 function read_calendar()
 {
   var calendar_name=CalendarApp.subscribeToCalendar(arubaito_calendar_id).getName()
+  Logger.log(calendar_name)
   //var calendar_name = 'アルバイト';  
   var today = new Date();
   var calendar=CalendarApp.getCalendarsByName(calendar_name);
@@ -102,7 +115,7 @@ function read_calendar()
     sheet.getRange(cell_id).setValue(calendar_name + " " + st + " - " + et);
     
   }
-  calendar[0].unsubscribeFromCalendar()
+  //calendar[0].unsubscribeFromCalendar()
 }
 
 function read_calendar2(){

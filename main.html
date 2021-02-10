@@ -65,7 +65,7 @@
             <label>終了時刻: </label> <input type = "time" id="<?= "FinishTime"+(i+1).toString()?>"><br>
             <button id="<?= "saveBooking"+(i+1).toString()?>" onclick="save_booking(this.id)"> 保存 </button>
           </div>
-          <p id="<?= "calendarT"+(i+1).toString()?>" hidden></p> 
+          <p id="<?= "calendarT"+(i+1).toString()?>" hidden>  </p> 
           <button id="<?= "deleteBooking"+(i+1).toString()?>" onclick="delete_booking(this.id)" hidden> 削除 </button>
         </td> 
       </tr>

@@ -45,6 +45,16 @@
 
   function booking(buttonId)
   {
+    var d = new Date();
+    var day = parseInt(d.getDate());
+    var month = parseInt(d.getMonth()+1);
+
+    day = (day<10) ? "0"+(day).toString() : (day).toString();
+    month = (month<10) ? "0"+(month).toString() : (month+1).toString();
+    date_string = d.getFullYear()+"-"+month+"-"+day;
+    document.getElementById("Date"+ buttonId[10]).setAttribute("min",date_string);
+    document.getElementById("Date"+ buttonId[10]).setAttribute("value",date_string);
+
     document.getElementById("calendar"+ buttonId[10]).removeAttribute("hidden");
     document.getElementById("buttonBook"+ buttonId[10]).setAttribute("hidden","true");
     document.getElementById("calendarT"+ buttonId[10]).setAttribute("hidden",'true');
@@ -64,15 +74,24 @@
     bookingInfo.finishTime = document.getElementById("FinishTime"+ buttonId[11]).value;
     bookingInfo.finalDate=bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime;
     document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
-    document.getElementById("calendarT"+ buttonId[11]).innerHTML ='Creating Event .....';
+    document.getElementById("calendarT"+ buttonId[11]).innerHTML ='Booking ...';
 
     google.script.run
-    .withSuccessHandler(()=>{
-      document.getElementById("calendarT"+ buttonId[11]).innerHTML =bookingInfo.finalDate;
-      document.getElementById("deleteBooking"+ buttonId[11]).removeAttribute("hidden");
+    .withSuccessHandler((flag_exist)=>{
+      if (flag_exist)
+      {
+        document.getElementById("calendarT"+ buttonId[11]).innerHTML =bookingInfo.finalDate;
+        document.getElementById("deleteBooking"+ buttonId[11]).removeAttribute("hidden");
+      }
+      else
+      {
+        document.getElementById("calendarT"+ buttonId[11]).innerHTML = "Booking time: Unavailable";
+        document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
+        // alert("Booking time: Unavailable");
+      }
     })
     .withFailureHandler((e)=>{
-      document.getElementById("calendarT"+ buttonId[11]).innerHTML =e.toString().split(':')[2]
+      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "Booking time: Unavailable";
       document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
     })
     .saveBooking(bookingInfo);

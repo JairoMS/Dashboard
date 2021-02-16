@@ -32,22 +32,17 @@ function saveBooking(bookingInfo)
   var cell_booking = "F" + (parseInt(bookingInfo.row)+1).toString();
   var cell_bookingId = "G" + (parseInt(bookingInfo.row)+1).toString();
   sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
-  
-  //try{
+
 //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
   
+  //let availableEvents=calendars[0].getEvents(start_time,end_time)
   const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作�Eする / Create Event
   sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
   calendars[0].unsubscribeFromCalendar() //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
-//}catch(error){
-  //Logger.log(error)
-  //Logger.log(reserveDate) 
 
-
-//}
   
 }
 

@@ -1,9 +1,10 @@
 var meeting_calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
 var arubaito_calendar_id= 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
 var reserveDate='nada';
+
 function doGet(e) 
 {
-  //read_calendar();
+  // read_calendar();
   read_calendar2();
   return HtmlService.createTemplateFromFile("main").evaluate();  
 }
@@ -37,13 +38,35 @@ function saveBooking(bookingInfo)
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
-  
-  //let availableEvents=calendars[0].getEvents(start_time,end_time)
-  const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", new Date(start_time.getTime()-1000 * 60 * 60 * 14), new Date(end_time.getTime()-1000 * 60 * 60 * 14));//イベントを作�Eする / Create Event
-  sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
-  calendars[0].unsubscribeFromCalendar() //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
+  start_time = new Date(start_time.getTime()-1000 * 60 * 60 * 14);
+  end_time = new Date(end_time.getTime()-1000 * 60 * 60 * 14);
 
+  var eventsOnThatDay= calendars[0].getEventsForDay(start_time);
+  Logger.log(eventsOnThatDay)
+
+  // Check if there is an event at that time
+  for (var i = 0 ; i<eventsOnThatDay.length ; i++)
+  {
+    s1 = eventsOnThatDay[i].getStartTime();
+    e1 = eventsOnThatDay[i].getEndTime();
+
+    if ( ( (start_time > s1 && start_time < e1) || (end_time > s1 && end_time < e1) ) || ((s1 > start_time && s1 < end_time) && (e1 > start_time && e1 < end_time)))
+    { 
+      Logger.log('Event exists!')
+      return false;
+    }
+  }
+
+  const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", start_time, end_time);//イベントを作�Eする / Create Event
+  sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
+  eventsToday.addEmailReminder(15);
   
+  Logger.log(!calendars[0].isOwnedByMe());
+  if (!calendars[0].isOwnedByMe())
+  {
+    calendars[0].unsubscribeFromCalendar(); //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
+  }
+  return true;
 }
 
 function deleteBooking(row)
@@ -62,8 +85,12 @@ function deleteBooking(row)
   var event = meeting_calendar[0].getEventById(event_id);
   event.deleteEvent();
   //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
-  meeting_calendar[0].unsubscribeFromCalendar();
-  Logger.log(event);
+  if(!meeting_calendar[0].isOwnedByMe())
+  {
+    meeting_calendar[0].unsubscribeFromCalendar();
+  }
+  
+  // Logger.log(event);
 }
 
 function data_from_ss()
@@ -128,7 +155,10 @@ function read_calendar2()
 
   Logger.log(today)
   for(var i=0 ; i<calendar_names.length ; i++)
-  {
+  { 
+    var cell_id = "E"+(i+2);
+    sheet.getRange(cell_id).clearContent(); 
+
     if (calendar_names[i].toString()!=="")
     {
       var calendar_name = calendar_names[i].toString();
@@ -148,8 +178,9 @@ function read_calendar2()
 
         if(eventToday.length>0)
         { 
-          var cell_id = "E"+(i+2);
-          var string_events = "";  
+          // var string_events = sheet.getRange(cell_id).getValues()+"\n"; 
+          var string_events = ""; 
+
           for (var j = 0 ; j<eventToday.length ; j++)
           {
             // Logger.log(eventToday.length);
@@ -207,17 +238,40 @@ function active_user()
   return find_name(list_email,email_user)-1;
 }
 
-function saving_booking_onEdit(e)
+function send_reminder() 
 {
-  Logger.log(e.range.getValue())
-  Logger.log(e.user)
-  Logger.log(e.value)
+  var email = "jmsaenz@silk.jp";
+  var subject = "Reminder";
+  var body = "Reminder";
+
+  // Send yourself an email with a link to the document.
+  GmailApp.sendEmail(email, subject, body);
 }
+
+// function saving_booking_onEdit()
+// {
+//   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
+//   var ss = SpreadsheetApp.openByUrl(url_ss);
+//   var sheet = ss.getSheetByName("Data");
+//   var list_booking = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
+//   var list_id = sheet.getRange(2,7,sheet.getLastRow()-1).getValues();
+//   for (var i = 0 ; i < list_booking.length ; i++)
+//   {
+//     if (list_booking[i]!=="" || list_id[i]!=="")
+//     {
+//       Logger.log(list_booking[i])
+//       Logger.log(list_id[i])
+//     }
+//   }
+  // Logger.log(list_booking)
+  // Logger.log(list_id)
+// }
 
 //// Function to create installable trigger onEdit()
 // function createSpreadsheetOnEditTrigger() 
 // {
-//   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
-//   var ss = SpreadsheetApp.openByUrl(url_ss);
-//   ScriptApp.newTrigger("saving_booking_onEdit").forSpreadsheet(ss).onEdit().create();
+// }
+
+// function test()
+// {
 // }

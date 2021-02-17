@@ -25,6 +25,20 @@ function saveUser(userInfo)
     sheet.getRange(cell_note).setValue(userInfo.note);
 }
 
+function testing(){
+  console.log("ff")
+}
+
+function getUserEmails(){
+  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  var list_email = sheet.getRange(2,8,sheet.getLastRow()-1).getValues();
+  return list_email;
+}
+
+
+
 function saveBooking(bookingInfo)
 { 
   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";

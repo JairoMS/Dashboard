@@ -9,7 +9,11 @@
   <body>
     <? var datass = data_from_ss(); ?>
     <? var userId = active_user(); ?>
-    <h2>ダッシュボード・シルク・ラボラトリ</h2>
+    <div class="header">
+      <a href="#memo">伝言メモ</a>
+      <h2>ダッシュボード・シルク・ラボラトリ</h2>
+      <a href="#settings">設定</a>
+    </div> 
     <table style="width:90%">
       <!--Headers-->
       <tr>
@@ -83,5 +87,27 @@
     </table>
     <!-- Including Java Script functions-->
     <?!= include("page-js"); ?>
+     <? var data = getUserEmails(); ?>
+    <div id="memo-div">
+        
+        <select name="" id="users">
+          <option value="op0">--社員を選択--</option>
+          <? for (var i = 0; i < data.length; i++) { ?>
+          <? for (var j = 0; j < data[i].length; j++) { ?>
+          <?if(data[i][j].toString()!==''){?>
+            <option ><?= data[i][j] ?></option>
+             <? }?>
+          <? } ?>
+        
+      <? } ?>
+        </select>
+        <textarea name="" id="memo" cols="30" rows="10"></textarea>
+        <button onclick="testing('memo')">送信</button>
+
+    </div>
+
+    <div id="settings">
+
+    </div>
   </body>
 </html>

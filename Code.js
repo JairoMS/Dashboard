@@ -29,11 +29,12 @@ function saveBooking(bookingInfo)
 { 
   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
-  var sheet = ss.getSheetByName("Data");
-  var cell_booking = "F" + (parseInt(bookingInfo.row)+1).toString();
-  var cell_bookingId = "G" + (parseInt(bookingInfo.row)+1).toString();
-  sheet.getRange(cell_booking).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
-
+  var sheet = ss.getSheetByName("Booking");
+  var row = parseInt(bookingInfo.row)+1;
+  var last_column = sheet.getRange(row,2).getValue()*2+3;
+  Logger.log(row)
+  Logger.log(last_column)
+  //try{
 //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
@@ -58,9 +59,11 @@ function saveBooking(bookingInfo)
   }
 
   const eventsToday = calendars[0].createEvent(calendars[0].getName() +" (" + bookingInfo.name + ")", start_time, end_time);//イベントを作�Eする / Create Event
-  sheet.getRange(cell_bookingId).setValue(eventsToday.getId());
-  eventsToday.addEmailReminder(15);
-  
+  sheet.getRange(row,last_column).setValue(bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime);
+  sheet.getRange(row,last_column+1).setValue(eventsToday.getId());
+  //eventsToday.addEmailReminder(15);
+  sheet.getRange(row,2).setValue(sheet.getRange(row,2).getValue()+1);
+
   Logger.log(!calendars[0].isOwnedByMe());
   if (!calendars[0].isOwnedByMe())
   {
@@ -69,21 +72,37 @@ function saveBooking(bookingInfo)
   return true;
 }
 
-function deleteBooking(row)
+function deleteBooking(list)
 {
   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
-  var sheet = ss.getSheetByName("Data");
-  var cell_booking = "F" + (parseInt(row)+1).toString();
-  var cell_bookingId = "G" + (parseInt(row)+1).toString();
-  var event_id = sheet.getRange(cell_bookingId).getValue();
-  sheet.getRange(cell_booking).setValue("");
-  sheet.getRange(cell_bookingId).setValue("");
+  var sheet = ss.getSheetByName("Booking");
+  var row = parseInt(list.row)+1;
+  var c;
+  var event_id = [];
+  var num_booking = sheet.getRange(row,2).getValue();
 
+  for (var i = 0 ; i<list.list.length ; i++)
+  {
+    c = parseInt(list.list[i])*2+2-2*i;
+    event_id[i] = sheet.getRange(row,c).getValue();
+    sheet.getRange(row,c-1,1,2).deleteCells(SpreadsheetApp.Dimension.COLUMNS);
+    // Logger.log(sheet.getRange(row,c-1,1,2).getValues());
+    num_booking -- ;
+  }
+
+  Logger.log(event_id);
+  sheet.getRange(row,2).setValue(num_booking);
+  
  //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
   var meeting_calendar=CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
-  var event = meeting_calendar[0].getEventById(event_id);
-  event.deleteEvent();
+  
+  for (var i = 0 ; i<event_id.length ; i++)
+  {
+    var event = meeting_calendar[0].getEventById(event_id[i]);
+    event.deleteEvent();
+  }
+
   //会議室のカレンダーの登録を削除する / Unsubscribe from meeting room calendar
   if(!meeting_calendar[0].isOwnedByMe())
   {
@@ -96,21 +115,22 @@ function deleteBooking(row)
 function data_from_ss()
 {
   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
-    var ss = SpreadsheetApp.openByUrl(url_ss);
-    var sheet = ss.getSheetByName("Data");
-    
-    r = sheet.getLastRow();
-    c = sheet.getLastColumn();
-    
-    datass = sheet.getSheetValues(2, 2, r-1, 4);
-    for (var i = 0 ; i<datass.length ; i++)
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  
+  r = sheet.getLastRow();
+  c = sheet.getLastColumn();
+  
+  datass = sheet.getSheetValues(2, 2, r-1, 4);
+  for (var i = 0 ; i<datass.length ; i++)
+  {
+    if (datass[i][3]!=="")
     {
-      if (datass[i][3]!=="")
-      {
-        datass[i][3] = datass[i][3].replace(/\n/g,"<br>"); // /g all matches
-      } 
-    }
-    return datass;
+      datass[i][3] = datass[i][3].replace(/\n/g,"<br>"); // /g all matches
+    } 
+  }
+  Logger.log(datass);
+  return datass;
 }
 
 function read_calendar()
@@ -238,40 +258,34 @@ function active_user()
   return find_name(list_email,email_user)-1;
 }
 
-function send_reminder() 
+function read_booking(row)
 {
-  var email = "jmsaenz@silk.jp";
-  var subject = "Reminder";
-  var body = "Reminder";
+  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Booking");
+  // r = 5;
+  r = parseInt(row);
+  c = sheet.getRange(r+1,2).getValue();
+  data = [];
+  data[0] = r;
 
-  // Send yourself an email with a link to the document.
-  GmailApp.sendEmail(email, subject, body);
+  if (c!=0)
+  { 
+    var d = sheet.getSheetValues(r+1, 3, 1, c*2);
+    
+    var i = 1;
+    for (var j = 1 ; j<c*2 ; j=j+2)
+    {
+      data[i] = d[0][j-1];
+      i++;
+        // Logger.log(d[i][j])
+    }
+  }else
+  {
+    data[1] = "";
+  }  
+  
+  // Logger.log(r+1);
+  Logger.log(data);
+  return data;
 }
-
-// function saving_booking_onEdit()
-// {
-//   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
-//   var ss = SpreadsheetApp.openByUrl(url_ss);
-//   var sheet = ss.getSheetByName("Data");
-//   var list_booking = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
-//   var list_id = sheet.getRange(2,7,sheet.getLastRow()-1).getValues();
-//   for (var i = 0 ; i < list_booking.length ; i++)
-//   {
-//     if (list_booking[i]!=="" || list_id[i]!=="")
-//     {
-//       Logger.log(list_booking[i])
-//       Logger.log(list_id[i])
-//     }
-//   }
-  // Logger.log(list_booking)
-  // Logger.log(list_id)
-// }
-
-//// Function to create installable trigger onEdit()
-// function createSpreadsheetOnEditTrigger() 
-// {
-// }
-
-// function test()
-// {
-// }

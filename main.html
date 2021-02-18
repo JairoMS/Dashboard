@@ -10,7 +10,7 @@
     <? var datass = data_from_ss(); ?>
     <? var userId = active_user(); ?>
     <h2>ダッシュボード・シルク・ラボラトリ</h2>
-    <table style="width:90%">
+    <table style="width:90%" border="0" cellspacing="0" cellpadding="0">
       <!--Headers-->
       <tr>
         <th style="width:5%"></th>            
@@ -65,8 +65,10 @@
         <td>
           <? if ((i+1)==userId) { ?>
             <button class="button button1" id="<?= "buttonBook"+(i+1).toString()?>" onclick="booking(this.id)"> 予約 </button>
+            <button class="button button1" id="<?= "DisplayB"+(i+1).toString()?>" onclick="display_booking(this.id)"> 表示予約 </button>
           <? } else { ?> 
-            <button class="button disabled" id="<?= "buttonBook"+(i+1).toString()?>" onclick="booking(this.id)"> 予約 </button>
+            <button class="button disabled"> 予約 </button>
+            <button class="button disabled"> 表示予約 </button>
           <? } ?> 
           <div id= "<?= "calendar"+(i+1).toString()?>" hidden> 
             <label>日付: </label>    <input type = "date" id="<?= "Date"+(i+1).toString()?>"><br>
@@ -76,6 +78,10 @@
             <button class="button button1" id="<?= "cancelBooking"+(i+1).toString()?>" onclick="cancel_booking(this.id)"> キャンセル </button>
           </div>
           <p id="<?= "calendarT"+(i+1).toString()?>" hidden></p> 
+          <ul id = "<?= "List"+(i+1).toString()?>" class = "white">
+          </ul>
+          <button class="button button1" id="<?= "cancelDisplay"+(i+1).toString()?>" onclick="cancel_display(this.id)" hidden> 戻る </button>
+          <div class="loader" id="<?= "Loader"+(i+1).toString()?>" hidden></div>
           <button class="button button1" id="<?= "deleteBooking"+(i+1).toString()?>" onclick="delete_booking(this.id)" hidden> 削除 </button>
         </td> 
       </tr>

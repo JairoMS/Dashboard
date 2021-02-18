@@ -62,6 +62,7 @@
     document.getElementById("Date"+ buttonId[10]).setAttribute("min",date_string);
     document.getElementById("Date"+ buttonId[10]).setAttribute("value",date_string);
 
+    document.getElementById("DisplayB"+ buttonId[10]).setAttribute("hidden","true");
     document.getElementById("calendar"+ buttonId[10]).removeAttribute("hidden");
     document.getElementById("buttonBook"+ buttonId[10]).setAttribute("hidden","true");
     document.getElementById("calendarT"+ buttonId[10]).setAttribute("hidden",'true');
@@ -69,9 +70,9 @@
 
   function save_booking(buttonId)
   {
+    var current_time = new Date();
     var bookingInfo = {};
     document.getElementById("calendar"+ buttonId[11]).setAttribute("hidden","true");
-    
     
     bookingInfo.row = buttonId[11];
     bookingInfo.name = document.getElementById("name"+ buttonId[11]).innerHTML;
@@ -79,21 +80,43 @@
     bookingInfo.date = document.getElementById("Date"+ buttonId[11]).value;
     bookingInfo.startTime = document.getElementById("StartTime"+ buttonId[11]).value;
     bookingInfo.finishTime = document.getElementById("FinishTime"+ buttonId[11]).value;
-    bookingInfo.finalDate=bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime;
-    document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
-    document.getElementById("calendarT"+ buttonId[11]).innerHTML ='Booking ...';
+    var s_time = new Date(bookingInfo.date.toString()+" "+bookingInfo.startTime.toString()); 
+
+    if (bookingInfo.startTime>bookingInfo.finishTime) 
+    {
+      document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
+      document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
+      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "End time cannot be earlier than start time.";
+      return;
+    }
+    else if (s_time<current_time)
+    {
+      document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
+      document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
+      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "Start time cannot be earlier than current time "+s_time;
+      return; 
+    }
+    
+    document.getElementById("Loader"+ buttonId[11]).removeAttribute("hidden");
+    bookingInfo.finalDate=bookingInfo.date + " " + bookingInfo.startTime + " - " + bookingInfo.finishTime;    
 
     google.script.run
     .withSuccessHandler((flag_exist)=>{
-      if (flag_exist)
+      if (flag_exist) // no reservation exists
       {
-        document.getElementById("calendarT"+ buttonId[11]).innerHTML =bookingInfo.finalDate;
-        document.getElementById("deleteBooking"+ buttonId[11]).removeAttribute("hidden");
+        // document.getElementById("calendarT"+ buttonId[11]).innerHTML =bookingInfo.finalDate;
+        // document.getElementById("deleteBooking"+ buttonId[11]).removeAttribute("hidden");
+        document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
+        document.getElementById("DisplayB"+ buttonId[11]).removeAttribute("hidden");
+        document.getElementById("Loader"+ buttonId[11]).setAttribute("hidden","true");
+        document.getElementById("calendarT"+ buttonId[11]).setAttribute("hidden","true");
       }
-      else
+      else// reservation exists
       {
+        document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
         document.getElementById("calendarT"+ buttonId[11]).innerHTML = "Booking time: Unavailable";
         document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
+        document.getElementById("Loader"+ buttonId[11]).setAttribute("hidden","true");
         // alert("Booking time: Unavailable");
       }
     })
@@ -106,12 +129,42 @@
   }
 
   function delete_booking(buttonId)
-  {
-    document.getElementById("buttonBook"+ buttonId[13]).removeAttribute("hidden");
+  { 
+    var close = document.getElementsByClassName("close");
+    var delete_items = {};
+    delete_items.row = buttonId[13];
+    delete_items.list = [];
+    var index = 0;
+    
+    for (var i = 0 ; i<close.length ; i++)
+    {
+      var id_item = "li"+(i+1).toString();
+      if (document.getElementById(id_item).classList == "checked")
+      {
+        delete_items.list[index] = i+1;
+        index ++ ;
+      }
+    } 
+    
+    if (delete_items.list.length == 0)
+    {
+      alert("No reservation to delete")
+      return;
+    }
+
     document.getElementById("calendarT"+ buttonId[13]).setAttribute("hidden","true");
     document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("cancelDisplay"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("List"+ buttonId[13]).setAttribute("hidden","true");
 
-    google.script.run.deleteBooking(buttonId[13]);
+    document.getElementById("Loader"+ buttonId[13]).removeAttribute("hidden");
+    
+    google.script.run.withSuccessHandler(()=>{
+      document.getElementById("Loader"+ buttonId[13]).setAttribute("hidden","true");
+      document.getElementById("buttonBook"+ buttonId[13]).removeAttribute("hidden");
+      document.getElementById("DisplayB"+ buttonId[13]).removeAttribute("hidden");
+    }
+    ).deleteBooking(delete_items);
   }
 
   function cancel_booking(buttonId)
@@ -120,5 +173,100 @@
     document.getElementById("calendar"+ buttonId[13]).setAttribute("hidden","true");
     document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
     // document.getElementById("cancelBooking"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("DisplayB"+ buttonId[13]).removeAttribute("hidden");
   }
+
+  function cancel_display(buttonId) // 戻るボタン
+  {
+    document.getElementById("buttonBook"+ buttonId[13]).removeAttribute("hidden");
+    document.getElementById("DisplayB"+ buttonId[13]).removeAttribute("hidden");
+
+    document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("List"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("cancelDisplay"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("calendarT5").setAttribute("hidden","true");
+  }
+
+  function display_booking(buttonId)
+  {
+    document.getElementById("buttonBook"+ buttonId[8]).setAttribute("hidden","true");
+    document.getElementById("DisplayB"+ buttonId[8]).setAttribute("hidden","true");
+    document.getElementById("Loader"+ buttonId[8]).removeAttribute("hidden");
+
+    google.script.run.withSuccessHandler((listBooking)=>
+    {
+      document.getElementById("Loader"+ buttonId[8]).setAttribute("hidden","true");
+      document.getElementById("cancelDisplay"+ buttonId[8]).removeAttribute("hidden");
+      document.getElementById("List"+ buttonId[8]).removeAttribute("hidden");
+      document.getElementById("deleteBooking"+ buttonId[8]).removeAttribute("hidden");
+  
+      if (listBooking[1]=="")
+      {
+        document.getElementById("calendarT5").removeAttribute("hidden");
+        document.getElementById("calendarT5").innerHTML = "No reservations";
+        return;
+      }
+      
+      var name_list = 'List'+listBooking[0];
+      var list = document.getElementById(name_list);
+      document.getElementById(name_list).innerHTML = "";
+
+      if (parseInt(listBooking[0])%2 == 0)
+      {
+        document.getElementById(name_list).setAttribute("class","blue");
+      }
+      else
+      {
+        document.getElementById(name_list).setAttribute("class","white");
+      }
+
+      for (var i = 1; i < listBooking.length; i++) 
+      {
+        var node = document.createElement("LI");
+        var textnode = document.createTextNode(listBooking[i]);
+        node.appendChild(textnode);
+        node.setAttribute("id","li"+(i).toString());
+        // node.classList.add("checked");
+        document.getElementById(name_list).appendChild(node);
+        
+      }
+      create_close_button();
+    }
+    ).read_booking(buttonId[8]);
+  }
+
+  // Create a "close" button and append it to each list item
+  function create_close_button()
+  {
+    var myNodelist = document.getElementsByTagName("LI");
+    var i;
+    for (i = 0; i < myNodelist.length; i++) 
+    {
+      var span = document.createElement("SPAN");
+      var txt = document.createTextNode("\u00D7");
+      
+      span.className = "close";
+      span.setAttribute("id","b"+(i+1).toString());
+      span.appendChild(txt);
+      myNodelist[i].appendChild(span);
+    }
+    close_button();
+  }
+
+  // Click on [×] button to select the item to delete
+  function close_button()
+  {
+    var close = document.getElementsByClassName("close");
+    for (var i = 0; i < close.length; i++) 
+    { 
+      close[i].onclick = function() 
+      {
+        var id_item = "li"+this.id[1];
+        var item = document.getElementById(id_item);
+        // alert(item.classList)
+        item.classList.toggle("checked");
+      }
+    }
+  }  
+
 </script>

@@ -25,20 +25,6 @@ function saveUser(userInfo)
     sheet.getRange(cell_note).setValue(userInfo.note);
 }
 
-function testing(){
-  console.log("ff")
-}
-
-function getUserEmails(){
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
-  var ss = SpreadsheetApp.openByUrl(url_ss);
-  var sheet = ss.getSheetByName("Data");
-  var list_email = sheet.getRange(2,8,sheet.getLastRow()-1).getValues();
-  return list_email;
-}
-
-
-
 function saveBooking(bookingInfo)
 { 
   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
@@ -299,7 +285,31 @@ function read_booking(row)
     data[1] = "";
   }  
   
-  // Logger.log(r+1);
-  Logger.log(data);
+  // Logger.log(data);
+  return data;
+}
+
+function read_booking2()
+{
+  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Booking");
+  // r = 5;
+  var data_ss = sheet.getRange(2,2,sheet.getLastRow()-1,sheet.getLastColumn()-1).getValues();
+  // Logger.log(data_ss)
+  data = [];
+
+  for (var i = 0 ; i < sheet.getLastRow()-1 ; i++)
+  { 
+    data[i] = "";
+    if (data_ss[i][0]!=0)
+    {
+      for (var j = 1 ; j < data_ss[i][0]*2 ; j=j+2)
+      {
+        data[i] = data[i]+data_ss[i][j]+"<br>";
+      }
+    }
+  }
+  Logger.log(data)
   return data;
 }

@@ -13,13 +13,6 @@
     
   }
 
-  function testing(id){
-    var f=document.getElementById(id);
-    var txt=f.value;
-    console.log(txt)
-    f.value="ff/"+f.value
-  }
-
   function save_button(buttonId)
   { 
     var info = {};
@@ -62,7 +55,8 @@
     document.getElementById("Date"+ buttonId[10]).setAttribute("min",date_string);
     document.getElementById("Date"+ buttonId[10]).setAttribute("value",date_string);
 
-    document.getElementById("DisplayB"+ buttonId[10]).setAttribute("hidden","true");
+    // document.getElementById("DisplayB"+ buttonId[10]).setAttribute("hidden","true");
+    document.getElementById("deleteBooking"+ buttonId[10]).setAttribute("hidden","true");
     document.getElementById("calendar"+ buttonId[10]).removeAttribute("hidden");
     document.getElementById("buttonBook"+ buttonId[10]).setAttribute("hidden","true");
     document.getElementById("calendarT"+ buttonId[10]).setAttribute("hidden",'true');
@@ -86,14 +80,14 @@
     {
       document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
       document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
-      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "End time cannot be earlier than start time.";
+      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "終了時刻は開始時刻より早くできません";
       return;
     }
     else if (s_time<current_time)
     {
       document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
       document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
-      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "Start time cannot be earlier than current time "+s_time;
+      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "開始時刻を現在の時刻より早くできません "+s_time;
       return; 
     }
     
@@ -107,21 +101,22 @@
         // document.getElementById("calendarT"+ buttonId[11]).innerHTML =bookingInfo.finalDate;
         // document.getElementById("deleteBooking"+ buttonId[11]).removeAttribute("hidden");
         document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
-        document.getElementById("DisplayB"+ buttonId[11]).removeAttribute("hidden");
+        // document.getElementById("DisplayB"+ buttonId[11]).removeAttribute("hidden");
         document.getElementById("Loader"+ buttonId[11]).setAttribute("hidden","true");
         document.getElementById("calendarT"+ buttonId[11]).setAttribute("hidden","true");
       }
       else// reservation exists
       {
         document.getElementById("calendarT"+ buttonId[11]).removeAttribute("hidden");
-        document.getElementById("calendarT"+ buttonId[11]).innerHTML = "Booking time: Unavailable";
+        document.getElementById("calendarT"+ buttonId[11]).innerHTML = "予約時間ご利用いただけません";
         document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
         document.getElementById("Loader"+ buttonId[11]).setAttribute("hidden","true");
         // alert("Booking time: Unavailable");
       }
+      display_booking(buttonId[11]);
     })
     .withFailureHandler((e)=>{
-      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "Booking time: Unavailable";
+      document.getElementById("calendarT"+ buttonId[11]).innerHTML = "予約時間ご利用いただけません";
       document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
     })
     .saveBooking(bookingInfo);
@@ -148,13 +143,13 @@
     
     if (delete_items.list.length == 0)
     {
-      alert("No reservation to delete")
+      alert("削除予約なし")
       return;
     }
 
     document.getElementById("calendarT"+ buttonId[13]).setAttribute("hidden","true");
     document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
-    document.getElementById("cancelDisplay"+ buttonId[13]).setAttribute("hidden","true");
+    document.getElementById("buttonBook"+ buttonId[13]).setAttribute("hidden","true");
     document.getElementById("List"+ buttonId[13]).setAttribute("hidden","true");
 
     document.getElementById("Loader"+ buttonId[13]).removeAttribute("hidden");
@@ -162,7 +157,9 @@
     google.script.run.withSuccessHandler(()=>{
       document.getElementById("Loader"+ buttonId[13]).setAttribute("hidden","true");
       document.getElementById("buttonBook"+ buttonId[13]).removeAttribute("hidden");
-      document.getElementById("DisplayB"+ buttonId[13]).removeAttribute("hidden");
+      // document.getElementById("DisplayB"+ buttonId[13]).removeAttribute("hidden");
+
+      display_booking(buttonId[13]);
     }
     ).deleteBooking(delete_items);
   }
@@ -184,26 +181,30 @@
     document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
     document.getElementById("List"+ buttonId[13]).setAttribute("hidden","true");
     document.getElementById("cancelDisplay"+ buttonId[13]).setAttribute("hidden","true");
-    document.getElementById("calendarT5").setAttribute("hidden","true");
+    document.getElementById("calendarT"+ buttonId[13]).setAttribute("hidden","true");
   }
 
-  function display_booking(buttonId)
+  function display_booking(userId)
   {
-    document.getElementById("buttonBook"+ buttonId[8]).setAttribute("hidden","true");
-    document.getElementById("DisplayB"+ buttonId[8]).setAttribute("hidden","true");
-    document.getElementById("Loader"+ buttonId[8]).removeAttribute("hidden");
+    //alert(userId)
+    userId = userId.toString();
+    document.getElementById("buttonBook"+ userId).setAttribute("hidden","true");
+    //　document.getElementById("DisplayB"+ userId).setAttribute("hidden","true");
+    document.getElementById("Loader"+ userId).removeAttribute("hidden");
 
     google.script.run.withSuccessHandler((listBooking)=>
     {
-      document.getElementById("Loader"+ buttonId[8]).setAttribute("hidden","true");
-      document.getElementById("cancelDisplay"+ buttonId[8]).removeAttribute("hidden");
-      document.getElementById("List"+ buttonId[8]).removeAttribute("hidden");
-      document.getElementById("deleteBooking"+ buttonId[8]).removeAttribute("hidden");
+      document.getElementById("Loader"+ userId).setAttribute("hidden","true");
+      // document.getElementById("cancelDisplay"+ userId).removeAttribute("hidden");
+      document.getElementById("List"+ userId).removeAttribute("hidden");
+      document.getElementById("deleteBooking"+ userId).removeAttribute("hidden");
+      document.getElementById("buttonBook"+ userId).removeAttribute("hidden");
   
       if (listBooking[1]=="")
       {
-        document.getElementById("calendarT5").removeAttribute("hidden");
-        document.getElementById("calendarT5").innerHTML = "No reservations";
+        document.getElementById("calendarT"+ userId).removeAttribute("hidden");
+        document.getElementById("List"+ userId).setAttribute("hidden","true");
+        document.getElementById("calendarT"+ userId).innerHTML = "予約はありません";
         return;
       }
       
@@ -232,7 +233,7 @@
       }
       create_close_button();
     }
-    ).read_booking(buttonId[8]);
+    ).read_booking(userId);
   }
 
   // Create a "close" button and append it to each list item
@@ -267,6 +268,13 @@
         item.classList.toggle("checked");
       }
     }
-  }  
+  } 
+
+  // This function is called when the page is loaded
+  window.onload = function() {
+    userId = document.getElementById("userId").innerHTML;
+    // alert(userId);
+    display_booking(userId);
+  }; 
 
 </script>

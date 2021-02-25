@@ -1,6 +1,7 @@
 var meeting_calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
 var arubaito_calendar_id= 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
 var reserveDate='nada';
+var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
 
 function doGet(e) 
 {
@@ -16,7 +17,6 @@ function include(file_name)
 
 function saveUser(userInfo)
 {
-    var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
     var ss = SpreadsheetApp.openByUrl(url_ss);
     var sheet = ss.getSheetByName("Data");
     var cell_status = "C" + (parseInt(userInfo.row)+1).toString();
@@ -27,7 +27,6 @@ function saveUser(userInfo)
 
 function saveBooking(bookingInfo)
 { 
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Booking");
   var row = parseInt(bookingInfo.row)+1;
@@ -74,7 +73,6 @@ function saveBooking(bookingInfo)
 
 function deleteBooking(list)
 {
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Booking");
   var row = parseInt(list.row)+1;
@@ -114,7 +112,6 @@ function deleteBooking(list)
 
 function data_from_ss()
 {
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
   
@@ -145,8 +142,6 @@ function read_calendar()
   {
     return;
   }
-
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
 
@@ -164,10 +159,9 @@ function read_calendar()
 
 function read_calendar2()
 {
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
-  var calendar_names=sheet.getRange(2,8,sheet.getLastRow()-1).getValues();
+  var calendar_names=sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
   // var today = new Date();
   // Use below function to get today date in JST format
   var today = today_jst();
@@ -250,17 +244,15 @@ function today_jst()
 function active_user()
 {
   var email_user = Session.getActiveUser().getEmail();
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
-  var list_email = sheet.getRange(2,8,sheet.getLastRow()-1).getValues();
+  var list_email = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
   // Logger.log(find_name(list_email,email_user)-1)
   return find_name(list_email,email_user)-1;
 }
 
-function read_booking(row)
+function read_booking_active_user(row)
 {
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Booking");
   // r = 5;
@@ -289,12 +281,11 @@ function read_booking(row)
   return data;
 }
 
-function read_booking2()
+function read_booking()
 {
-  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Booking");
-  // r = 5;
+
   var data_ss = sheet.getRange(2,2,sheet.getLastRow()-1,sheet.getLastColumn()-1).getValues();
   // Logger.log(data_ss)
   data = [];
@@ -312,4 +303,64 @@ function read_booking2()
   }
   Logger.log(data)
   return data;
+}
+
+// Trigger to delete one day before bookings. It fires around 12:00am
+function deleteBooking_trigger()
+{
+  var yesterday = new Date();
+  yesterday = new Date(yesterday.getTime()-1000*60*60*10);
+  Logger.log(yesterday);
+
+  var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName())[0].getEventsForDay(yesterday);
+  // Logger.log(calendars.length);
+  var list = [];
+  for (var i = 0 ; i < calendars.length ; i++)
+  {
+    list[i] = calendars[i].getId();
+  }
+  // Logger.log(list);
+
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Booking");
+  var data_ss = sheet.getRange(2,3,sheet.getLastRow()-1,sheet.getLastColumn()-1).getValues();
+  var num_booking;
+  var index;
+  for (var j = 0 ; j<list.length ; j++)
+  { 
+    calendars[j].deleteEvent();
+    for (var i = 0 ; i<data_ss.length ; i++)
+    {
+      num_booking = sheet.getRange(i+2,2).getValue();
+      index = data_ss[i].indexOf(list[j]);
+      if (index != -1)
+      {
+        // Logger.log(sheet.getRange(i+2,index+2,1,2).getValues())
+        sheet.getRange(i+2,index+2-2*j,1,2).deleteCells(SpreadsheetApp.Dimension.COLUMNS);
+        num_booking--;
+      }
+      sheet.getRange(i+2,2).setValue(num_booking);
+    } 
+  }
+}
+
+function getScriptURL() // This function is used to reload the page 
+{
+  return ScriptApp.getService().getUrl();
+}
+
+function getUserEmails()
+{
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  var list_email = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
+  return list_email;
+}
+
+function sendMessage(msg)
+{
+  Logger.log(msg.email)
+  Logger.log(msg.memo)
+  var subject = Session.getActiveUser().getEmail()+"が送ったダッシュボードからの伝言";
+  GmailApp.sendEmail(msg.email, subject, msg.memo);
 }

@@ -4,12 +4,13 @@
     <base target="_top">
     <!-- Including css style-->
     <?!= include("page-css"); ?>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+
   </head>
   <body>
     <? var datass = data_from_ss(); ?>
     <? var userId = active_user(); ?>
-    <? var booking_list = read_booking2(); ?>
+    <? var booking_list = read_booking(); ?>
     <p id ="userId" hidden><?= userId ?></p>
     <h2>ダッシュボード・シルク・ラボラトリ</h2>
     <table style="width:90%" border="0" cellspacing="0" cellpadding="0">
@@ -95,7 +96,38 @@
       </tr>
       <? } ?>  
     </table>
+    <!-- <button class="button button1" id="reload" onclick="reLoad()"> Reload </button> -->
     <!-- Including Java Script functions-->
     <?!= include("page-js"); ?>
+    <? var data = getUserEmails(); ?>
+    <!-- Trigger/Open The Modal -->
+    <button class="button button1" id="Btn_popup" onclick="popup()"> 伝言 </button>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+      <!-- Modal content -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close_popup">&times;</span>
+          <h2>伝言</h2>
+        </div>
+        <div id="memo-div">
+        <br>
+        <select class="select_email" id="msg_email">
+          <option value="op0">--社員を選択--</option>
+          <? for (var i = 0; i < data.length; i++) { ?>
+            <? for (var j = 0; j < data[i].length; j++) { ?>
+              <?if(data[i][j].toString()!==''){?>
+                <option ><?= data[i][j] ?></option>
+              <? }?>
+            <? } ?>
+          <? } ?>
+        </select><br><br>
+        <textarea id="memo" cols="50" rows="10"></textarea><br>
+        <button class="button button1" id="send_message" onclick="send_message()"> 送信 </button>
+    </div>
+      </div>
+    </div>
   </body>
 </html>

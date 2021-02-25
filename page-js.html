@@ -233,7 +233,7 @@
       }
       create_close_button();
     }
-    ).read_booking(userId);
+    ).read_booking_active_user(userId);
   }
 
   // Create a "close" button and append it to each list item
@@ -270,11 +270,55 @@
     }
   } 
 
-  // This function is called when the page is loaded
+  // This function is called after the page is loaded
   window.onload = function() {
     userId = document.getElementById("userId").innerHTML;
     // alert(userId);
     display_booking(userId);
-  }; 
+    reLoad();
+  };
 
+  function reLoad() 
+  {
+    setTimeout( function() 
+    {
+      google.script.run
+      .withSuccessHandler(function(url)
+      {
+        window.open(url,'_top');
+      }).getScriptURL();
+    }, 1000*60*5); // 1000 ms * (60 seconds) * (desired minutes)
+  } 
+  
+  // This functions makes the popup appear
+  function popup()
+  {
+    var modal = document.getElementById("myModal");
+    modal.style.display = "block";
+    popup_close();
+  }
+
+  function popup_close()
+  {
+    var span = document.getElementsByClassName("close_popup")[0];
+    var modal = document.getElementById("myModal");
+
+    span.onclick = function() 
+    {
+      modal.style.display = "none";
+    }
+  }
+
+  function send_message()
+  {
+    var msg = {};
+    msg.email = document.getElementById("msg_email").value;
+    msg.memo = document.getElementById("memo").value;
+    google.script.run.withSuccessHandler(()=>
+    {
+      var modal = document.getElementById("myModal");
+      modal.style.display = "none";
+    }
+    ).sendMessage(msg);
+  }
 </script>

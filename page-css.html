@@ -52,7 +52,7 @@
   }
 
   .button {
-    background-color: #1e76be; /* Green */
+    background-color: #1e76be;
     border: none;
     color: white;
     padding: 8px 25px;
@@ -67,14 +67,16 @@
   .disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    border-radius: 10%;
+    /* border-radius: 10%; */
+    border-radius: 25px;
   }
 
   .button1 {
     background-color: white; 
     color: black; 
     border: 2px solid #1e76be;
-    border-radius: 10%;
+    /* border-radius: 10%; */
+    border-radius: 25px;
   }
 
   .button1:hover {
@@ -117,6 +119,15 @@
     border-radius: 4px;
     background-color: #f1f1f1;
   }
+
+  select.select_email {
+    width: 60%;
+    padding: 12px 20px;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+  }
+
   /* loader */
   .loader {
     border: 8px solid #f3f3f3;
@@ -213,5 +224,90 @@
   .close:hover {
     background-color: #f44336;
     color: white;
+  }
+
+    /* The Modal (background) */
+  .modal 
+  {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0px;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+
+  /* Modal Content */
+  .modal-content 
+  {
+    position: relative;
+    top: 100px;
+    background-color: #ffffff;
+    margin: auto;
+    padding: 0;
+    border-radius: 25px;
+    border: 5px solid #34a0d1;
+    width: 50%;
+    height: 55%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.5s;
+    animation-name: animatetop;
+    animation-duration: 0.5s;
+    text-align: center;
+  }
+
+  /* Add Animation */
+  @-webkit-keyframes animatetop 
+  {
+    from {top:100px; opacity:0} 
+    to {top:100px; opacity:1}
+  }
+
+  @keyframes animatetop 
+  {
+    from {top:100px; opacity:0}
+    to {top:100px; opacity:1}
+  }
+
+  /* The Close Button */
+  .close_popup 
+  {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close_popup:hover,
+  .close_popup:focus 
+  {
+    color: #135370;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-header 
+  {
+    padding: 1px 20px;
+    border-radius: 10px;
+    background-color: #34a0d1;
+    color: white;
+  }
+
+  .modal-body {padding: 2px 16px;}
+
+  /* Text box to write message */
+  textarea 
+  {
+    padding: 12px 20px;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+    background-color: #f1f1f1;
   }
 </style>

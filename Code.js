@@ -1,13 +1,23 @@
-var meeting_calendar_id='c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
-var arubaito_calendar_id= 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
+var meeting_calendar_id = 'c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
+// var meeting_calendar_id = 'c_k8u5g1urpvnqvh0tpovu43cr3k@developer.gserviceaccount.com';
+var arubaito_calendar_id = 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
 var reserveDate='nada';
 var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
 
 function doGet(e) 
 {
   // read_calendar();
-  read_calendar2();
-  return HtmlService.createTemplateFromFile("main").evaluate();  
+  // read_calendar_events_today();
+  var x = isNewUser();
+  
+  if ( x != -1)
+  {
+    return HtmlService.createTemplateFromFile("new-user").evaluate(); 
+  }
+  else
+  {
+    return HtmlService.createTemplateFromFile("main").evaluate();
+  }
 }
 
 function include(file_name)
@@ -21,7 +31,7 @@ function saveUser(userInfo)
     var sheet = ss.getSheetByName("Data");
     var cell_status = "C" + (parseInt(userInfo.row)+1).toString();
     var cell_note = "D" + (parseInt(userInfo.row)+1).toString();
-    sheet.getRange(cell_status).setValue(userInfo.status);
+    sheet.getRange(cell_status).setValue(userInfo.status.trim());
     sheet.getRange(cell_note).setValue(userInfo.note);
 }
 
@@ -130,41 +140,42 @@ function data_from_ss()
   return datass;
 }
 
-function read_calendar()
-{
-  var calendar_name = 'アルバイト'  
-  // var today = new Date();
-  // Use below function to get today date in JST format
-  var today = today_jst();
-  var calendar = CalendarApp.getCalendarsByName(calendar_name)[0].getEventsForDay(today);
+// function read_calendar()
+// {
+//   var calendar_name = 'アルバイト'  
+//   var today = new Date();
+//   // Use below function to get today date in JST format
+//   today = date_jst(today);
+//   var calendar = CalendarApp.getCalendarsByName(calendar_name)[0].getEventsForDay(today);
   
-  if (calendar.length == 0)
-  {
-    return;
-  }
-  var ss = SpreadsheetApp.openByUrl(url_ss);
-  var sheet = ss.getSheetByName("Data");
+//   if (calendar.length == 0)
+//   {
+//     return;
+//   }
+//   var ss = SpreadsheetApp.openByUrl(url_ss);
+//   var sheet = ss.getSheetByName("Data");
 
-  list = sheet.getSheetValues(2, 2, sheet.getLastRow()-1, 1);
+//   list = sheet.getSheetValues(2, 2, sheet.getLastRow()-1, 1);
 
-  for (var i = 0 ; i < calendar.length ; i++ )
-  {
-    var st = Utilities.formatDate(calendar[i].getStartTime(), "GMT+9", "HH:mm");
-    var et = Utilities.formatDate(calendar[i].getEndTime(), "GMT+9", "HH:mm");
-    var cell_id = "E"+find_name(list, calendar[i].getTitle());
-    sheet.getRange(cell_id).setValue(calendar_name + " " + st + " - " + et);
+//   for (var i = 0 ; i < calendar.length ; i++ )
+//   {
+//     var st = Utilities.formatDate(calendar[i].getStartTime(), "GMT+9", "HH:mm");
+//     var et = Utilities.formatDate(calendar[i].getEndTime(), "GMT+9", "HH:mm");
+//     var cell_id = "E"+find_name(list, calendar[i].getTitle());
+//     sheet.getRange(cell_id).setValue(calendar_name + " " + st + " - " + et);
     
-  }
-}
+//   }
+// }
 
-function read_calendar2()
+function read_calendar_events_today()
 {
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
   var calendar_names=sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
-  // var today = new Date();
+  var today = new Date();
+  
   // Use below function to get today date in JST format
-  var today = today_jst();
+  today = date_jst(today);
   var email = Session.getActiveUser().getEmail();
 
   Logger.log(today)
@@ -219,6 +230,132 @@ function read_calendar2()
       }     
     }
   }
+} 
+
+function read_calendar_date()
+{ 
+  var date = new Date();
+  date = date_jst(new Date(date));
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  var calendar_names=sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
+  var email = Session.getActiveUser().getEmail();
+  
+  var list_events = [];
+  var k = 0 ;
+ 
+  list_events[k] = Array(calendar_names.length);
+  
+  for(var i = 0 ; i<calendar_names.length ; i++)
+  { 
+    var cell_id = "E"+(i+2);
+    list_events[k][i] = "";
+    
+    if (calendar_names[i].toString()!=="")
+    {
+      var calendar_name = calendar_names[i].toString();
+      
+      var calendar  =  Calendar.Calendars.get(calendar_name);
+      if(typeof calendar !== 'undefined')
+      {
+        if (calendar_name !== email)
+        {
+          var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+          var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(date);
+        }
+        else
+        {
+          var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(date);
+        }
+
+        if(eventToday.length>0)
+        { 
+          var string_events = ""; 
+          for (var j = 0 ; j<eventToday.length ; j++)
+          {
+            // Logger.log(eventToday.length);
+            var theEvent = eventToday[j];
+            var st = Utilities.formatDate(theEvent.getStartTime(), "GMT+9", "HH:mm");
+            var et = Utilities.formatDate(theEvent.getEndTime(), "GMT+9", "HH:mm");
+            
+            string_events = string_events + theEvent.getTitle() + " " + st + " - " + et + "\n";
+          }
+          list_events[k][i] = string_events;
+          sheet.getRange(cell_id).setValue(string_events); 
+        }
+        if (calendar_name !== email)
+        {
+          aCal.unsubscribeFromCalendar();
+        }
+          
+      }    
+    }
+  } 
+  
+  // Logger.log(list_events)
+  return list_events;
+}  
+
+function read_new_date(number_days)
+{ 
+  
+  var date = new Date();
+  date = date_jst(new Date(date));
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  var calendar_names=sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
+  var email = Session.getActiveUser().getEmail();
+  date = new Date(date.getTime()+1000*60*60*24*number_days);
+  var new_list = [];
+  // Logger.log(date)
+  // return
+    
+  for(var i = 0 ; i<calendar_names.length ; i++)
+  {
+    new_list[i] = "";
+    
+    if (calendar_names[i].toString()!=="")
+    {
+      var calendar_name = calendar_names[i].toString();
+      
+      var calendar  =  Calendar.Calendars.get(calendar_name);
+      if(typeof calendar !== 'undefined')
+      {
+        if (calendar_name !== email)
+        {
+          var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+          var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(date);
+        }
+        else
+        {
+          var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(date);
+        }
+
+        if(eventToday.length>0)
+        { 
+          var string_events = ""; 
+          for (var j = 0 ; j<eventToday.length ; j++)
+          {
+            // Logger.log(eventToday.length);
+            var theEvent = eventToday[j];
+            var st = Utilities.formatDate(theEvent.getStartTime(), "GMT+9", "HH:mm");
+            var et = Utilities.formatDate(theEvent.getEndTime(), "GMT+9", "HH:mm");
+            
+            string_events = string_events + theEvent.getTitle() + " " + st + " - " + et + "\n";
+          }
+          new_list[i] = string_events;
+        }
+        if (calendar_name !== email)
+        {
+          aCal.unsubscribeFromCalendar();
+        }
+          
+      }    
+    }
+  } 
+  // Logger.log(new_list)
+  return new_list;
+  // Logger.log(new_list)
 }  
   
 function find_name(list, name)
@@ -232,13 +369,12 @@ function find_name(list, name)
   }
 }
 
-function today_jst()
+function date_jst(date)
 { 
-  // By default, new Date() function in Google Apps Script gets the standard time from America/Los_Angeles (Pacific time)  
-  var today = new Date(); 
-  var today_jst = new Date(today.getTime()+1000*60*60*14);
-  Logger.log(today_jst);
-  return today_jst;
+  // By default, new Date() function in Google Apps Script gets the standard time from America/Los_Angeles (Pacific time)   
+  var date_jst = new Date(date.getTime()+1000*60*60*14);
+  // Logger.log(date_jst);
+  return date_jst;
 }
 
 function active_user()
@@ -247,8 +383,12 @@ function active_user()
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
   var list_email = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
-  // Logger.log(find_name(list_email,email_user)-1)
-  return find_name(list_email,email_user)-1;
+  var user = {};
+  
+  user.index=find_name(list_email,email_user)-1; 
+  user.name = sheet.getRange(user.index+1,2,1).getValues()+"さん";
+
+  return user;
 }
 
 function read_booking_active_user(row)
@@ -305,7 +445,8 @@ function read_booking()
   return data;
 }
 
-// Trigger to delete one day before bookings. It fires around 12:00am
+// Trigger to delete one day before bookings. It fires around 12:00am.
+// It also updates the spreadsheet
 function deleteBooking_trigger()
 {
   var yesterday = new Date();
@@ -319,7 +460,7 @@ function deleteBooking_trigger()
   {
     list[i] = calendars[i].getId();
   }
-  // Logger.log(list);
+  Logger.log(list);
 
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Booking");
@@ -342,6 +483,15 @@ function deleteBooking_trigger()
       sheet.getRange(i+2,2).setValue(num_booking);
     } 
   }
+
+  // the following two lines clear the data in the columns "status" and "memo"
+  var sheet2 = ss.getSheetByName("Data");
+  sheet2.getRange(2,3,sheet2.getLastRow()-1).setValue('帰宅');
+  sheet2.getRange(2,4,sheet2.getLastRow()-1).clearContent();
+
+  // updates the spreadsheet
+  read_calendar_events_today();
+  
 }
 
 function getScriptURL() // This function is used to reload the page 
@@ -363,4 +513,145 @@ function sendMessage(msg)
   Logger.log(msg.memo)
   var subject = Session.getActiveUser().getEmail()+"が送ったダッシュボードからの伝言";
   GmailApp.sendEmail(msg.email, subject, msg.memo);
+  var email_list = getUserEmails();
+  var index = find_name(email_list,msg.email.trim())-1;
+  SpreadsheetApp.openByUrl(url_ss).getSheetByName("Data").getRange(index+1,7).setValue("1");
+
+  return index;
 }
+
+function readInfoRefresh()
+{
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  
+  var r = sheet.getLastRow();
+  
+  datass = sheet.getSheetValues(2, 3, r-1, 3);
+  for (var i = 0 ; i<datass.length ; i++)
+  {
+    if (datass[i][2]!=="")
+    {
+      datass[i][2] = datass[i][2].replace(/\n/g,"<br>"); // /g all matches
+    } 
+  }
+
+  sheet = ss.getSheetByName("Booking");
+  var data_ss = sheet.getRange(2,2,sheet.getLastRow()-1,sheet.getLastColumn()-1).getValues();
+  // Logger.log(data_ss)
+  var data;
+  var list_flags_mgs = readMessages();
+
+  for (var i = 0 ; i < sheet.getLastRow()-1 ; i++)
+  { 
+    data= "";
+    if (data_ss[i][0]!=0)
+    {
+      for (var j = 1 ; j < data_ss[i][0]*2 ; j=j+2)
+      {
+        data = data+data_ss[i][j]+"<br>";
+      }
+      
+    }
+    datass[i][3] = data;
+    datass[i][4] = list_flags_mgs[i];
+  }
+
+  Logger.log(datass)
+  return datass; 
+}
+
+function readMessages()
+{
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  
+  var r = sheet.getLastRow();
+  var msg_flags = sheet.getSheetValues(2, 7, r-1, 1);
+  
+  Logger.log(msg_flags);
+  return msg_flags;
+}
+
+function alreadyReadMsg(index)
+{
+  
+  Logger.log(index)
+  SpreadsheetApp.openByUrl(url_ss).getSheetByName("Data").getRange(parseInt(index)+1,7).setValue("0");
+}
+
+function isNewUser()
+{
+  var list_users = getUserEmails();
+  var current_user = Session.getActiveUser().getEmail();
+  var index_user = find_name(list_users, current_user);
+  if (index_user == null)
+  {
+    // add_new_user(current_user);
+    Logger.log("New user: "+current_user);
+    return current_user;
+  }
+  return -1;
+}
+
+function add_new_user(name_user) 
+{
+  var current_user = Session.getActiveUser().getEmail();
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  var list_names = sheet.getRange(2,2,sheet.getLastRow()-1).getValues();
+  var index_user = find_name(list_names, name_user.trim());
+  // Logger.log(sheet.getLastRow())
+  if (index_user == null)
+  {
+    var row_index = sheet.getLastRow()+1;
+    sheet.getRange(row_index,1).setValue(row_index-1);
+    sheet.getRange(row_index,2).setValue(name_user.trim());
+    sheet.getRange(row_index,6).setValue(current_user.toString());
+    sheet.getRange(row_index,7).setValue(0);
+    
+  }
+  else
+  {
+    sheet.getRange(index_user,6).setValue(current_user.toString());
+  }
+
+  // var resource = {
+  //     'scope': {
+  //       'type': 'user',
+  //       'value': current_user,
+  //     },
+  //     'role': 'writer'
+  //   };
+
+  // Calendar.Acl.insert(resource, meeting_calendar_id);
+}
+
+function getScriptURL() // This function is used to reload the page 
+{
+  // Logger.log(ScriptApp.getService().getUrl());
+  return "https://script.google.com/a/macros/silk.jp/s/AKfycby6HF_3smNrDda3wSuwATPN7A9zLBkdUWyOkOGsu0Mv/dev";
+}
+
+// function test()
+// {
+//   var current_user = "bohulu.ackah@silk.jp";
+//   var resource = {
+//       'scope': {
+//         'type': 'user',
+//         'value': current_user,
+//       },
+//       'role': 'writer'
+//     };
+
+//   Calendar.Acl.insert(resource, meeting_calendar_id);
+// }
+
+// function test()
+// {
+//   var ss = SpreadsheetApp.openByUrl(url_ss);
+//   var sheet2 = ss.getSheetByName("Data");
+//   sheet2.getRange(2,3,sheet2.getLastRow()-1).setValue('帰宅');
+//   sheet2.getRange(2,4,sheet2.getLastRow()-1).clearContent();
+
+// }

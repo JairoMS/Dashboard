@@ -114,13 +114,16 @@
         <div id="memo-div">
           <p>社員を選択：　</p>
           <select class="select_email" id="msg_email">
-            <? for (var i = 0; i < data.length; i++) { ?>
+            <!-- <? for (var i = 0; i < data.length; i++) { ?>
               <? for (var j = 0; j < data[i].length; j++) { ?>
                 <?if(data[i][j].toString()!==''){?>
                   <option ><?= data[i][j] ?></option>
                 <? }?>
               <? } ?>
-            <? } ?>
+            <? } ?> -->
+            <? for (var i = 0; i < data.list_names.length; i++) { ?>
+                  <option value="<?= data.list_email[i] ?>" ><?= data.list_names[i] ?></option>
+            <? } ?>  
           </select><br>
           <p>伝言の入力：　</p>
           <textarea id="memo"></textarea><br><br>

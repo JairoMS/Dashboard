@@ -12,6 +12,7 @@
   var flag_category2 = false;
   var list_name = [];
   const email_address_inbox = "https://mail.google.com/mail/u/0/#inbox";
+  // alert(document.getElementById("userId").innerHTML)
 
   (function()
     {
@@ -28,11 +29,14 @@
       
       var initial_selection = document.getElementById("status"+userId).children;
       var actual_status = document.getElementById("statusT"+userId).innerHTML;
+      if (actual_status.trim()=="")
+      {
+        return;
+      }
+      
       var i;
 
-      
-
-      for (var i = 0 ; i<initial_selection.length ; i++)
+      for (i = 0 ; i<initial_selection.length ; i++)
       {
         
         if ( initial_selection[i].value.trim() == actual_status.trim() )
@@ -40,6 +44,7 @@
           break;
         }
       }
+      
       initial_selection[i].setAttribute("selected","");
     }
   )();
@@ -261,14 +266,16 @@
       var list = document.getElementById(name_list);
       list.innerHTML = "";
 
-      if (parseInt(listBooking[0])%2 == 0)
-      {
-        document.getElementById(name_list).setAttribute("class","blue");
-      }
-      else
-      {
-        document.getElementById(name_list).setAttribute("class","white");
-      }
+      // if (parseInt(listBooking[0])%2 == 0)
+      // {
+      //   document.getElementById(name_list).setAttribute("class","blue");
+      // }
+      // else
+      // {
+      //   document.getElementById(name_list).setAttribute("class","white");
+      // }
+
+      document.getElementById(name_list).setAttribute("class","white");
 
       for (var i = 1; i < listBooking.length; i++) 
       {
@@ -404,7 +411,7 @@
           for (var i = 0 ; data_refreshed.length ; i++ )
           {
             document.getElementById("noteT"+(i+1).toString()).innerHTML = data_refreshed[i][1];
-            document.getElementById("schedule"+(i+1).toString()).innerHTML = data_refreshed[i][2];
+            // document.getElementById("schedule"+(i+1).toString()).innerHTML = data_refreshed[i][2];
             var new_color = status_color.indexOf(data_refreshed[i][0].trim());
             
             document.getElementById("statusT"+(i+1).toString()).innerHTML = data_refreshed[i][0];

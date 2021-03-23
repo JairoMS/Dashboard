@@ -1,14 +1,18 @@
-var meeting_calendar_id = 'c_k8u5g1urpvnqvh0tpovu43cr3k@group.calendar.google.com';
+var meeting_calendar_id = 'c_dmhmoef7aksb1hiu0n2taobjhk@group.calendar.google.com';
 // var meeting_calendar_id = 'c_k8u5g1urpvnqvh0tpovu43cr3k@developer.gserviceaccount.com';
-var arubaito_calendar_id = 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
+// var arubaito_calendar_id = 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
 var reserveDate='nada';
-var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
+var url_ss = "https://docs.google.com/spreadsheets/d/1p7kIRtdrElo-QaKkrnGTjE8DTch23OrmHag8gDJRgqU/edit#gid=0";
+var email_main_access = "part-timer@silk.co.jp"
+
 
 function doGet(e) 
 {
   // read_calendar();
   // read_calendar_events_today();
+  // Logger.log(JSON.stringify(e))
   var x = isNewUser();
+  Logger.log(Session.getActiveUser().getEmail())
   
   if ( x != -1)
   {
@@ -41,8 +45,8 @@ function saveBooking(bookingInfo)
   var sheet = ss.getSheetByName("Booking");
   var row = parseInt(bookingInfo.row)+1;
   var last_column = sheet.getRange(row,2).getValue()*2+3;
-  Logger.log(row)
-  Logger.log(last_column)
+  // Logger.log(row)
+  // Logger.log(last_column)
   //try{
 //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
@@ -60,7 +64,7 @@ function saveBooking(bookingInfo)
     s1 = eventsOnThatDay[i].getStartTime();
     e1 = eventsOnThatDay[i].getEndTime();
 
-    if ( ( (start_time > s1 && start_time < e1) || (end_time > s1 && end_time < e1) ) || ((s1 > start_time && s1 < end_time) && (e1 > start_time && e1 < end_time)))
+    if ( ( (start_time >= s1 && start_time < e1) || (end_time > s1 && end_time < e1) ) || ((s1 > start_time && s1 < end_time) && (e1 > start_time && e1 < end_time)))
     { 
       Logger.log('Event exists!')
       return false;
@@ -178,7 +182,7 @@ function read_calendar_events_today()
   today = date_jst(today);
   var email = Session.getActiveUser().getEmail();
 
-  Logger.log(today)
+  // Logger.log(today)
   for(var i=0 ; i<calendar_names.length ; i++)
   { 
     var cell_id = "E"+(i+2);
@@ -258,15 +262,30 @@ function read_calendar_date()
       var calendar  =  Calendar.Calendars.get(calendar_name);
       if(typeof calendar !== 'undefined')
       {
-        if (calendar_name !== email)
+        // if (calendar_name !== email)
+        // {
+        //   var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+        //   var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(date);
+        // }
+        // else
+        // {
+        //   var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(date);
+        // }
+
+        // Logger.log(calendar.id)
+        var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+        
+        try
         {
-          var aCal=CalendarApp.subscribeToCalendar(calendar.id);
-          var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(date);
+          var eventToday = CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(date);
         }
-        else
+        catch(err)
         {
-          var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(date);
+          Logger.log(calendar_name+" has no calendars to read")
+          aCal.unsubscribeFromCalendar();
+          continue;
         }
+        
 
         if(eventToday.length>0)
         { 
@@ -283,7 +302,7 @@ function read_calendar_date()
           list_events[k][i] = string_events;
           sheet.getRange(cell_id).setValue(string_events); 
         }
-        if (calendar_name !== email)
+        if (calendar_name !== email_main_access)
         {
           aCal.unsubscribeFromCalendar();
         }
@@ -321,10 +340,20 @@ function read_new_date(number_days)
       var calendar  =  Calendar.Calendars.get(calendar_name);
       if(typeof calendar !== 'undefined')
       {
+        
         if (calendar_name !== email)
         {
           var aCal=CalendarApp.subscribeToCalendar(calendar.id);
-          var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(date);
+          try
+          {
+            var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(date);
+          }
+          catch(err)
+          {
+            Logger.log(calendar_name+" has no calendars to read")
+            aCal.unsubscribeFromCalendar();
+            continue;
+          }  
         }
         else
         {
@@ -451,7 +480,7 @@ function deleteBooking_trigger()
 {
   var yesterday = new Date();
   yesterday = new Date(yesterday.getTime()-1000*60*60*10);
-  Logger.log(yesterday);
+  // Logger.log(yesterday);
 
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName())[0].getEventsForDay(yesterday);
   // Logger.log(calendars.length);
@@ -460,7 +489,7 @@ function deleteBooking_trigger()
   {
     list[i] = calendars[i].getId();
   }
-  Logger.log(list);
+  // Logger.log(list);
 
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Booking");
@@ -484,27 +513,30 @@ function deleteBooking_trigger()
     } 
   }
 
-  // the following two lines clear the data in the columns "status" and "memo"
+  // the following lines clear the data in the columns "status" and "memo"
   var sheet2 = ss.getSheetByName("Data");
-  sheet2.getRange(2,3,sheet2.getLastRow()-1).setValue('帰宅');
-  sheet2.getRange(2,4,sheet2.getLastRow()-1).clearContent();
+  sheet2.getRange(2,3,sheet2.getLastRow()-1,2).clearContent();
 
   // updates the spreadsheet
   read_calendar_events_today();
   
 }
 
-function getScriptURL() // This function is used to reload the page 
-{
-  return ScriptApp.getService().getUrl();
-}
+// function getScriptURL() // This function is used to reload the page 
+// {
+//   return ScriptApp.getService().getUrl();
+// }
 
 function getUserEmails()
 {
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Data");
-  var list_email = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
-  return list_email;
+  var employees = {}
+  employees.list_email = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
+  employees.list_names = sheet.getRange(2,2,sheet.getLastRow()-1).getValues();
+  Logger.log(employees.list_email[1])
+  Logger.log(employees.list_names.length)
+  return employees;
 }
 
 function sendMessage(msg)
@@ -512,8 +544,8 @@ function sendMessage(msg)
   Logger.log(msg.email)
   Logger.log(msg.memo)
   var subject = Session.getActiveUser().getEmail()+"が送ったダッシュボードからの伝言";
-  GmailApp.sendEmail(msg.email, subject, msg.memo);
-  var email_list = getUserEmails();
+  // GmailApp.sendEmail(msg.email, subject, msg.memo);
+  var email_list = getUserEmails().list_email;
   var index = find_name(email_list,msg.email.trim())-1;
   SpreadsheetApp.openByUrl(url_ss).getSheetByName("Data").getRange(index+1,7).setValue("1");
 
@@ -537,12 +569,12 @@ function readInfoRefresh()
   }
 
   sheet = ss.getSheetByName("Booking");
-  var data_ss = sheet.getRange(2,2,sheet.getLastRow()-1,sheet.getLastColumn()-1).getValues();
+  var data_ss = sheet.getRange(2,2,r-1,sheet.getLastColumn()-1).getValues();
   // Logger.log(data_ss)
   var data;
   var list_flags_mgs = readMessages();
 
-  for (var i = 0 ; i < sheet.getLastRow()-1 ; i++)
+  for (var i = 0 ; i < r-1 ; i++)
   { 
     data= "";
     if (data_ss[i][0]!=0)
@@ -553,6 +585,8 @@ function readInfoRefresh()
       }
       
     }
+    Logger.log(r)
+    Logger.log(data)
     datass[i][3] = data;
     datass[i][4] = list_flags_mgs[i];
   }
@@ -582,13 +616,13 @@ function alreadyReadMsg(index)
 
 function isNewUser()
 {
-  var list_users = getUserEmails();
+  var list_users = getUserEmails().list_email;
   var current_user = Session.getActiveUser().getEmail();
   var index_user = find_name(list_users, current_user);
   if (index_user == null)
   {
     // add_new_user(current_user);
-    Logger.log("New user: "+current_user);
+    // Logger.log("New user: "+current_user);
     return current_user;
   }
   return -1;
@@ -629,29 +663,18 @@ function add_new_user(name_user)
 
 function getScriptURL() // This function is used to reload the page 
 {
-  // Logger.log(ScriptApp.getService().getUrl());
-  return "https://script.google.com/a/macros/silk.jp/s/AKfycby6HF_3smNrDda3wSuwATPN7A9zLBkdUWyOkOGsu0Mv/dev";
+  Logger.log(ScriptApp.getService().getUrl());
+  return ScriptApp.getService().getUrl();
 }
 
-// function test()
-// {
-//   var current_user = "bohulu.ackah@silk.jp";
-//   var resource = {
-//       'scope': {
-//         'type': 'user',
-//         'value': current_user,
-//       },
-//       'role': 'writer'
-//     };
+function test()
+{
+  var calendar_name = "uchida@silk.co.jp";    
+  var calendar  =  Calendar.Calendars.get(calendar_name);
+  Logger.log(calendar.id)
+  var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+      
+  var eventToday = CalendarApp.getCalendarsByName(aCal.getName());
+  Logger.log(CalendarApp.getCalendarsByName(aCal.getName()).length)
 
-//   Calendar.Acl.insert(resource, meeting_calendar_id);
-// }
-
-// function test()
-// {
-//   var ss = SpreadsheetApp.openByUrl(url_ss);
-//   var sheet2 = ss.getSheetByName("Data");
-//   sheet2.getRange(2,3,sheet2.getLastRow()-1).setValue('帰宅');
-//   sheet2.getRange(2,4,sheet2.getLastRow()-1).clearContent();
-
-// }
+}

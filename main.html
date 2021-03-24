@@ -8,9 +8,8 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
-    <? var datass = data_from_ss(); ?>
-    <? var userId = active_user().index; ?>
-    <? var booking_list = read_booking(); ?>
+    <? var x = data_from_ss(); var datass = x.data; var userId = x.index ?>
+    
     <p id ="userId" hidden><?= userId ?></p>
     <p id ="number_of_users" hidden><?= datass.length ?></p>
     
@@ -29,8 +28,8 @@
         </th>
         <th style="background-color: white; color: black; width:33%;">
           <div class="user">
-            <p id="date_top_page">date</p>
-            <p><?= active_user().name ?></p>
+            <p id = "date_top_page">date</p>
+            <p id = "name_of_user"></p>
             <!-- Trigger/Open The Modal -->
           </div>
         </th>
@@ -62,19 +61,19 @@
           </td>
           <!--Name-->
           <td> 
-            <p id = "<?= "name"+(i+1).toString()?>" style="text-align: center;"> <?= datass[i][0]?> </p>
+            <p id = "<?= "name"+(i+1).toString()?>" style="text-align: center;">  </p>
           </td>
           <!--Status-->
           <td>
             <div style="width: 100%;">
-             <p class="status" id = "<?= "statusT"+(i+1).toString()?>"> <?= datass[i][1]?> </p>
+             <p class="status" id = "<?= "statusT"+(i+1).toString()?>">  </p>
             </div>
           </td>
           <!--Note-->
           <td>
             <div>
               <p id = "<?= "noteT"+(i+1).toString()?>" >  
-                <?= datass[i][2]?>
+                
               </p>
             </div>
           </td>
@@ -91,7 +90,7 @@
               <p style="text-align: center;" id="<?= "calendarT"+(i+1).toString()?>" hidden></p>
             <? } else { ?> 
               <p style="text-align: center;" id="<?= "calendarT"+(i+1).toString()?>">
-                <?!= booking_list[i] ?>
+                
               </p>
             <? } ?> 
             <div class="loader" id="<?= "Loader"+(i+1).toString()?>" hidden></div>
@@ -102,7 +101,7 @@
         </tr>
       <? } ?>  
     </table>
-    <? var data = getUserEmails(); ?>
+    <!-- <? var data = getUserEmails(); ?> -->
     <!-- Message Pop-up -->
     <div id="myModal" class="modal">
       <!-- Modal content -->
@@ -114,16 +113,9 @@
         <div id="memo-div">
           <p>社員を選択：　</p>
           <select class="select_email" id="msg_email">
-            <!-- <? for (var i = 0; i < data.length; i++) { ?>
-              <? for (var j = 0; j < data[i].length; j++) { ?>
-                <?if(data[i][j].toString()!==''){?>
-                  <option ><?= data[i][j] ?></option>
-                <? }?>
-              <? } ?>
-            <? } ?> -->
-            <? for (var i = 0; i < data.list_names.length; i++) { ?>
+            <!-- <? for (var i = 0; i < data.list_names.length; i++) { ?>
                   <option value="<?= data.list_email[i] ?>" ><?= data.list_names[i] ?></option>
-            <? } ?>  
+            <? } ?>   -->
           </select><br>
           <p>伝言の入力：　</p>
           <textarea id="memo"></textarea><br><br>
@@ -142,11 +134,11 @@
             <br>
             <label>予約日: 　</label>    <input type = "date" id="<?= "Date"+(userId).toString()?>" onclick="flag_category=true;"><br>
             <label>予約時刻：　</label>　
-              <select id="start_time" style="width: 20%;" onclick="set_category_time0(); flag_category2=true;"> 
+              <select id="start_time" style="width: 15%;" onclick="set_category_time0(); flag_category2=true;"> 
                 <option>開始時刻</option>
               </select> 
             <label>~</label> 
-              <select id="end_time" style="width: 30%;" onclick="set_category_time_end()"> 
+              <select id="end_time" style="width: 20%;" onclick="set_category_time_end()"> 
                 <option>終了時刻</option>
               </select>
             <br>

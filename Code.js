@@ -1,6 +1,4 @@
-//var meeting_calendar_id = 'c_dmhmoef7aksb1hiu0n2taobjhk@group.calendar.google.com';
- var meeting_calendar_id = 'c_k8u5g1urpvnqvh0tpovu43cr3k@developer.gserviceaccount.com';
-// var arubaito_calendar_id = 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
+var meeting_calendar_id = 'c_dmhmoef7aksb1hiu0n2taobjhk@group.calendar.google.com';
 var reserveDate='nada';
 //var url_ss = "https://docs.google.com/spreadsheets/d/1p7kIRtdrElo-QaKkrnGTjE8DTch23OrmHag8gDJRgqU/edit#gid=0";
   var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
@@ -9,10 +7,9 @@ var email_main_access = "part-timer@silk.co.jp"
 
 function doGet(e) 
 {
-  // read_calendar();
-  // read_calendar_events_today();
-  // Logger.log(JSON.stringify(e))
-  //var x = isNewUser();
+  
+  var x = isNewUser();
+  Logger.log(Session.getActiveUser().getEmail())
   
   var x = 0;
   //Logger.log(Session.getActiveUser().getEmail())
@@ -51,10 +48,6 @@ function saveBooking(bookingInfo)
   var sheet = ss.getSheetByName("Booking");
   var row = parseInt(bookingInfo.row)+1;
   var last_column = sheet.getRange(row,2).getValue()*2+3;
-  // Logger.log(row)
-  // Logger.log(last_column)
-  //try{
-//会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(meeting_calendar_id).getName());
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
@@ -136,17 +129,14 @@ function data_from_ss()
   var sheet = ss.getSheetByName("Data");
   
   r = sheet.getLastRow();
-  c = sheet.getLastColumn();
+  datass = {}
+  datass.data = sheet.getSheetValues(2, 2, r-1, 3);
   
-  datass = sheet.getSheetValues(2, 2, r-1, 4);
-  for (var i = 0 ; i<datass.length ; i++)
-  {
-    if (datass[i][3]!=="")
-    {
-      datass[i][3] = datass[i][3].replace(/\n/g,"<br>"); // /g all matches
-    } 
-  }
-  Logger.log(datass);
+  datass.index=find_name(sheet.getSheetValues(2, 6, r-1, 1) , Session.getActiveUser().getEmail())-1;
+
+  // Logger.log(sheet.getSheetValues(2, 6, r-1, 2));
+  Logger.log(datass.data);
+  Logger.log(datass.data[1][0]);
   return datass;
 }
 
@@ -177,70 +167,70 @@ function data_from_ss()
 //   }
 // }
 
-function read_calendar_events_today()
-{
-  var ss = SpreadsheetApp.openByUrl(url_ss);
-  var sheet = ss.getSheetByName("Data");
-  var calendar_names=sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
-  var today = new Date();
+// function read_calendar_events_today()
+// {
+//   var ss = SpreadsheetApp.openByUrl(url_ss);
+//   var sheet = ss.getSheetByName("Data");
+//   var calendar_names=sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
+//   var today = new Date();
   
-  // Use below function to get today date in JST format
-  today = date_jst(today);
-  var email = Session.getActiveUser().getEmail();
+//   // Use below function to get today date in JST format
+//   today = date_jst(today);
+//   var email = Session.getActiveUser().getEmail();
 
-  // Logger.log(today)
-  for(var i=0 ; i<calendar_names.length ; i++)
-  { 
-    var cell_id = "E"+(i+2);
-    sheet.getRange(cell_id).clearContent(); 
+//   // Logger.log(today)
+//   for(var i=0 ; i<calendar_names.length ; i++)
+//   { 
+//     var cell_id = "E"+(i+2);
+//     sheet.getRange(cell_id).clearContent(); 
 
-    if (calendar_names[i].toString()!=="")
-    {
-      var calendar_name = calendar_names[i].toString();
+//     if (calendar_names[i].toString()!=="")
+//     {
+//       var calendar_name = calendar_names[i].toString();
       
-      var calendar  =  Calendar.Calendars.get(calendar_name);
-      if(typeof calendar !== 'undefined')
-      {
-        if (calendar_name !== email)
-        {
-          var aCal=CalendarApp.subscribeToCalendar(calendar.id);
-          var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(today);
-        }
-        else
-        {
-          var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(today);
-        }
+//       var calendar  =  Calendar.Calendars.get(calendar_name);
+//       if(typeof calendar !== 'undefined')
+//       {
+//         if (calendar_name !== email)
+//         {
+//           var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+//           var eventToday=CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(today);
+//         }
+//         else
+//         {
+//           var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(today);
+//         }
 
-        if(eventToday.length>0)
-        { 
-          // var string_events = sheet.getRange(cell_id).getValues()+"\n"; 
-          var string_events = ""; 
+//         if(eventToday.length>0)
+//         { 
+//           // var string_events = sheet.getRange(cell_id).getValues()+"\n"; 
+//           var string_events = ""; 
 
-          for (var j = 0 ; j<eventToday.length ; j++)
-          {
-            // Logger.log(eventToday.length);
-            var theEvent = eventToday[j];
-            var st = Utilities.formatDate(theEvent.getStartTime(), "GMT+9", "HH:mm");
-            var et = Utilities.formatDate(theEvent.getEndTime(), "GMT+9", "HH:mm");
+//           for (var j = 0 ; j<eventToday.length ; j++)
+//           {
+//             // Logger.log(eventToday.length);
+//             var theEvent = eventToday[j];
+//             var st = Utilities.formatDate(theEvent.getStartTime(), "GMT+9", "HH:mm");
+//             var et = Utilities.formatDate(theEvent.getEndTime(), "GMT+9", "HH:mm");
             
-            string_events = string_events + theEvent.getTitle() + " " + st + " - " + et + "\n";
-            // Logger.log(string_events);
+//             string_events = string_events + theEvent.getTitle() + " " + st + " - " + et + "\n";
+//             // Logger.log(string_events);
 
-          }
-          sheet.getRange(cell_id).setValue(string_events); 
-        }
-        if (calendar_name !== email)
-        {
-          aCal.unsubscribeFromCalendar();
-        }
+//           }
+//           sheet.getRange(cell_id).setValue(string_events); 
+//         }
+//         if (calendar_name !== email)
+//         {
+//           aCal.unsubscribeFromCalendar();
+//         }
           
-      }
-      else
-      {
-      }     
-    }
-  }
-} 
+//       }
+//       else
+//       {
+//       }     
+//     }
+//   }
+// } 
 
 function read_calendar_date()
 { 
@@ -265,7 +255,17 @@ function read_calendar_date()
     {
       var calendar_name = calendar_names[i].toString();
       
-      var calendar  =  Calendar.Calendars.get(calendar_name);
+      try
+      {
+        var calendar  =  Calendar.Calendars.get(calendar_name);
+      }
+      catch(err)
+      {
+        Logger.log(calendar_name+" has to change his/her rights to access calendar")
+        list_events[k][i] = "?Check permissions"
+        continue;
+      }
+      
       if(typeof calendar !== 'undefined')
       {
         // if (calendar_name !== email)
@@ -277,7 +277,6 @@ function read_calendar_date()
         // {
         //   var eventToday = CalendarApp.getCalendarById(calendar.id).getEventsForDay(date);
         // }
-
         // Logger.log(calendar.id)
         var aCal=CalendarApp.subscribeToCalendar(calendar.id);
         
@@ -288,6 +287,9 @@ function read_calendar_date()
         catch(err)
         {
           Logger.log(calendar_name+" has no calendars to read")
+          Logger.log(calendar_name+" has to change his/her rights to access calendar")
+          list_events[k][i] = "?Check permissions"
+        
           aCal.unsubscribeFromCalendar();
           continue;
         }
@@ -317,7 +319,7 @@ function read_calendar_date()
     }
   } 
   
-  // Logger.log(list_events)
+  Logger.log(list_events)
   return list_events;
 }  
 
@@ -343,7 +345,17 @@ function read_new_date(number_days)
     {
       var calendar_name = calendar_names[i].toString();
       
-      var calendar  =  Calendar.Calendars.get(calendar_name);
+      try
+      {
+        var calendar  =  Calendar.Calendars.get(calendar_name);
+      }
+      catch(err)
+      {
+        Logger.log(calendar_name+" has to change his/her rights to access calendar")
+        new_list[i] = "?Check permissions"
+        continue;
+      }
+
       if(typeof calendar !== 'undefined')
       {
         
@@ -357,6 +369,7 @@ function read_new_date(number_days)
           catch(err)
           {
             Logger.log(calendar_name+" has no calendars to read")
+            new_list[i] = "?Check permissions";
             aCal.unsubscribeFromCalendar();
             continue;
           }  
@@ -404,6 +417,11 @@ function find_name(list, name)
   }
 }
 
+function test()
+{
+
+}
+
 function date_jst(date)
 { 
   // By default, new Date() function in Google Apps Script gets the standard time from America/Los_Angeles (Pacific time)   
@@ -422,7 +440,9 @@ function active_user()
   
   user.index=find_name(list_email,email_user)-1; 
   user.name = sheet.getRange(user.index+1,2,1).getValues()+"さん";
+  user.email =  email_user;
 
+  Logger.log(user.email);
   return user;
 }
 
@@ -524,7 +544,7 @@ function deleteBooking_trigger()
   sheet2.getRange(2,3,sheet2.getLastRow()-1,2).clearContent();
 
   // updates the spreadsheet
-  read_calendar_events_today();
+  // read_calendar_events_today();
   
 }
 
@@ -540,8 +560,8 @@ function getUserEmails()
   var employees = {}
   employees.list_email = sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
   employees.list_names = sheet.getRange(2,2,sheet.getLastRow()-1).getValues();
-  Logger.log(employees.list_email[1])
-  Logger.log(employees.list_names.length)
+  // Logger.log(employees.list_email[1])
+  // Logger.log(employees.list_names.length)
   return employees;
 }
 
@@ -655,16 +675,6 @@ function add_new_user(name_user)
   {
     sheet.getRange(index_user,6).setValue(current_user.toString());
   }
-
-  // var resource = {
-  //     'scope': {
-  //       'type': 'user',
-  //       'value': current_user,
-  //     },
-  //     'role': 'writer'
-  //   };
-
-  // Calendar.Acl.insert(resource, meeting_calendar_id);
 }
 
 function getScriptURL() // This function is used to reload the page 
@@ -673,14 +683,117 @@ function getScriptURL() // This function is used to reload the page
   return ScriptApp.getService().getUrl();
 }
 
-function test()
+function read_all_calendars10()
 {
-  var calendar_name = "uchida@silk.co.jp";    
-  var calendar  =  Calendar.Calendars.get(calendar_name);
-  Logger.log(calendar.id)
-  var aCal=CalendarApp.subscribeToCalendar(calendar.id);
-      
-  var eventToday = CalendarApp.getCalendarsByName(aCal.getName());
-  Logger.log(CalendarApp.getCalendarsByName(aCal.getName()).length)
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheet = ss.getSheetByName("Data");
+  var calendar_names=sheet.getRange(2,6,sheet.getLastRow()-1).getValues();
 
+  var date = new Date();
+
+  var array_dates = [];
+  array_dates[0]= date_jst(new Date(date));
+
+  for (var i = 1 ; i<=10 ; i++)
+  {
+    array_dates[i] = new Date(array_dates[0].getTime()+1000*60*60*24*i);
+  }
+  
+  var list_events = Array(calendar_names.length);
+
+  for (var n = 0 ; n<list_events.length ; n++)
+  {
+    list_events[n] = Array(array_dates.length);
+  }
+  
+  for (var i = 0 ; i<calendar_names.length ; i++)
+  {
+    if (calendar_names[i].toString()!=="")
+    {
+      var calendar_name = calendar_names[i].toString();
+      
+      try
+      {
+        var calendar  =  Calendar.Calendars.get(calendar_name);
+      }
+      catch(err)
+      {
+        Logger.log(calendar_name+" has to change his/her rights to access calendar")
+        // list_events[i][j] = "?Check permissions"
+        for (var n = 0 ; n<array_dates.length ; n++)
+        {
+          // sheetC.getRange(i+1,n).setValue("?Check permissions");
+          list_events[i][n]="?Check permissions";
+        }
+        
+        continue;
+      }
+
+      Logger.log(calendar_name)
+      if(typeof calendar !== 'undefined')
+      {
+        
+        var aCal=CalendarApp.subscribeToCalendar(calendar.id);
+        
+        for (var j = 0 ; j<array_dates.length ; j++ )
+        {
+          
+          try
+          {
+            var eventToday = CalendarApp.getCalendarsByName(aCal.getName())[0].getEventsForDay(array_dates[j]);
+          }
+          catch(err)
+          {
+            Logger.log(calendar_name+" has no calendars to read")
+            Logger.log(calendar_name+" has to change his/her rights to access calendar")
+            sheetC.getRange(i+1,j+1).setValue("?Check permissions");
+            list_events[i][j]="?Check permissions";
+            // aCal.unsubscribeFromCalendar();
+            continue;
+          }
+          
+          var string_events = " ";
+          if(eventToday.length>0)
+          {             
+            for (var k = 0 ; k<eventToday.length ;k++)
+            {
+              // Logger.log(eventToday.length);
+              var theEvent = eventToday[k];
+              var st = Utilities.formatDate(theEvent.getStartTime(), "GMT+9", "HH:mm");
+              var et = Utilities.formatDate(theEvent.getEndTime(), "GMT+9", "HH:mm");
+              
+              string_events = string_events + theEvent.getTitle().toString() + " " + st.toString() + " - " + et.toString() + "\n";
+            }
+        
+            // sheetC.getRange(i+1,j+1).setValue(string_events); 
+          }
+          list_events[i][j] = string_events;
+          
+        }
+        if (calendar_name !== email_main_access)
+        {
+          aCal.unsubscribeFromCalendar();
+        }  
+      }    
+    }
+  }
+  
+  var sheetC = ss.getSheetByName("Calendar");
+  for(var i=0 ; i<calendar_names.length ; i++)
+  {
+    for (var j=0 ; j<array_dates.length ; j++)
+    {
+      sheetC.getRange(i+1,j+1).setValue(list_events[i][j])
+    }
+  }
+  // Logger.log(list_events)
+  return list_events;
+}
+
+function read_ss_calendars()
+{
+  var ss = SpreadsheetApp.openByUrl(url_ss);
+  var sheetC = ss.getSheetByName("Calendar");
+  Logger.log(sheetC.getRange(1,1,sheetC.getLastRow(),sheetC.getLastColumn()-1).getValues());
+  return sheetC.getRange(1,1,sheetC.getLastRow(),sheetC.getLastColumn()-1).getValues();
 }

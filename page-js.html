@@ -19,17 +19,19 @@
   var flag_category2 = false;
   var list_name = [];
   const email_address_inbox = "https://mail.google.com/mail/u/0/#inbox";
+  var email_current_user = "";
+  const owner = "morita@silk.co.jp";
 
   // alert(document.getElementById("userId").innerHTML)
 
-  // (function()
-  //   {
-  //     for (var i = 1 ; i <= number_of_users ; i++)
-  //     {
-  //       list_name[i-1] = document.getElementById("name"+i.toString()).innerHTML;
-  //     }
-  //   }
-  // )();
+  function create_list_names()
+  {
+    for (var i = 1 ; i <= number_of_users ; i++)
+    {
+      list_name[i-1] = document.getElementById("name"+i.toString()).innerHTML;
+    }
+  }
+  
 
   // (function()
   //   {
@@ -85,42 +87,39 @@
   function reservation_time()
   { 
     var index_array = 0;
-
     var minutes_s;
-    var am_pm = [" am"," pm"];
     
-    for (var i = 0 ; i < 2 ; i++)
-    {
-      for (var j = 0 ; j < 12 ; j++)
+    for (var j = 0 ; j < 24 ; j++)
+    { 
+      for (var k = 0 ; k < 60 ; k=k+15)
       { 
-        for (var k = 0 ; k < 60 ; k=k+15)
-        { 
-          if (k==0)
-          {
-            minutes_s = "00";
-          }
-          else
-          {
-            minutes_s = k.toString();
-          }
-          if (j == 0)
-          {
-            list_time[index_array] = "12:"+minutes_s+am_pm[i];
-          }
-          else
-          {
-            list_time[index_array] = j.toString()+":"+minutes_s+am_pm[i];
-          }
-          interval[index_array] = "（" + ( ((index_array+1)*15<60) ? "":　 ( (((index_array+1)*15)/60 | 0).toString()+"時間") ) + ( ((((index_array+1)*15)%60)==0 ) ? "" : ( (((index_array+1)*15)%60)+"分" ) ) + "）";
-          index_array++;
+        if (k==0)
+        {
+          minutes_s = "00";
         }
+        else
+        {
+          minutes_s = k.toString();
+        }
+        if (j == 0)
+        {
+          list_time[index_array] = "00:"+minutes_s;
+        }
+        else
+        {
+          list_time[index_array] = j.toString()+":"+minutes_s;
+        }
+        interval[index_array] = "（" + ( ((index_array+1)*15<60) ? "":　 ( (((index_array+1)*15)/60 | 0).toString()+"時間") ) + ( ((((index_array+1)*15)%60)==0 ) ? "" : ( (((index_array+1)*15)%60)+"分" ) ) + "）";
+        index_array++;
       }
-    } 
-    list_time[list_time.length] = "12:00 am"; 
+    }
+     
+    list_time[list_time.length] = "00:00"; 
   }
 
   google.script.run.withSuccessHandler((x)=>
   {
+    var userId = document.getElementById("userId").innerHTML;
     list_events = x;
     document.getElementById("following-date").setAttribute("class","arrow");
     document.getElementById("following-date").setAttribute("onclick","following_date()");
@@ -129,11 +128,29 @@
     {
       document.getElementById("LoaderSchedule"+(i+1).toString()).setAttribute("hidden","true");
       document.getElementById("schedule"+(i+1).toString()).removeAttribute("hidden");
-      document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[0][i].toString().replace(/\n/g,"<br>");
+      if ( list_events[0][i].toString().trim() == "?Check permissions" )
+      {
+        if ( (i+1) == userId || email_current_user == owner )
+        {
+          document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+          document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
+        }
+        else
+        {
+          document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
+        }
+      }
+      else
+      {
+        document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[0][i].toString().replace(/\n/g,"<br>");
+      }  
+      
     }
+    // retrieve_calendar10();
   }
   ).read_calendar_date(); 
 
+  
   function save_button()
   { 
     // document.getElementById(buttonId).setAttribute("hidden","true");
@@ -399,18 +416,46 @@
     var youbi = ['日','月','火','水','木','金','土'];
     var day_week = youbi[date_loading.getDay()];
 
-    display_booking(userId);
+    // test_read_calendar();
+    set_information();
     
-    set_colors_status();
+    // set_colors_status();
+    set_category_emails();
+
+    google.script.run.withSuccessHandler((user)=>
+      {
+        document.getElementById("name_of_user").innerHTML = user.name;
+        email_current_user = user.email;
+        display_booking(userId);
+        set_booking_info();
+      }
+    ).active_user();
+    
     document.getElementById("schedule-date").innerHTML = mm+"月"+dd+"日";
     document.getElementById("date_top_page").innerHTML = yy+"年"+mm+"月"+dd+"日"+"（"+day_week+"）";
     // reLoad()
-    alert_msg();
+    // alert_msg();
+
+    // display_booking(userId);
+    // set_booking_info();
     refresh_data();
     reservation_time();
-    popup_new_user();
+    // alert(email_current_user);
+    // popup_new_user();
     // is_new_user();
   };
+
+  function set_booking_info() 
+  {
+    google.script.run.withSuccessHandler((data)=>
+      {
+        for (var i = 1 ; i<data.length ; i++)
+        {
+          document.getElementById("calendarT"+i.toString()).innerHTML = data[i-1];
+        }
+      }
+    ).read_booking();
+  }
 
   function set_colors_status()
   {
@@ -578,7 +623,7 @@
     {
       display_new_date_schedule(index_date);
     }
-
+    
     display_date_schedule();
   }
 
@@ -586,17 +631,35 @@
   { 
     var day = date_loading.getDate()+index_date;
     var month = date_loading.getMonth()+1;
-
+    var userId = document.getElementById("userId").innerHTML; 
+    
     document.getElementById("schedule-date").innerHTML = month+"月"+day+"日";
 
     for (var i = 0 ; i <number_of_users ; i++)
     {
-      document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[index_date][i].toString().replace(/\n/g,"<br>");
+      // document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[index_date][i].toString().replace(/\n/g,"<br>");
+      if ( list_events[index_date][i].toString().trim() == "?Check permissions" )
+        {
+          if ( (i+1) == userId || email_current_user == owner)
+          {
+            document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+            document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
+          }
+          else
+          {
+            document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
+          }
+        }
+        else
+        {
+          document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[index_date][i].toString().replace(/\n/g,"<br>");
+        } 
     }
   }
 
   function display_new_date_schedule(index_date)
   { 
+    
     var flag = false;
     var new_date = new Date();
     new_date = new Date(new_date.getTime()+1000*60*60*24*index_date)
@@ -605,7 +668,6 @@
     {
       flag = true;
     }
-    
     
     for (var i = 1 ; i <= number_of_users ; i++)
     {
@@ -629,7 +691,25 @@
       {
         document.getElementById("schedule"+(i+1).toString()).removeAttribute("hidden");
         document.getElementById("LoaderSchedule"+(i+1).toString()).setAttribute("hidden","true");
-        document.getElementById("schedule"+(i+1).toString()).innerHTML = schedule[i].toString().replace(/\n/g,"<br>");
+        
+        // document.getElementById("schedule"+(i+1).toString()).innerHTML = schedule[i].toString().replace(/\n/g,"<br>");
+
+        if ( schedule[i].toString().trim() == "?Check permissions" )
+        {
+          if ( (i+1) == userId || email_current_user == owner)
+          {
+            document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+            document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
+          }
+          else
+          {
+            document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
+          }
+        }
+        else
+        {
+          document.getElementById("schedule"+(i+1).toString()).innerHTML = schedule[i].toString().replace(/\n/g,"<br>");
+        }  
 
         if (!flag)
         {
@@ -837,35 +917,75 @@
     }
   }
 
-   function popup_new_user()
-  {
-    var modalN = document.getElementById("New_User");
-    modalN.style.display = "block";
-    popup_close_new_user();
-  }
-
-  function popup_close_new_user()
-  {
-    var spanN = document.getElementsByClassName("close_popup")[3];
-    var modalN = document.getElementById("New_User");
-
-    spanN.onclick = function() 
-    {
-      modalN.style.display = "none";
-    }
-  }
-
-  // function is_new_user()
+  //  function popup_new_user()
   // {
-  //   google.script.run.withSuccessHandler((current_user)=>
-  //     {
-  //       alert(current_user)
-  //     }
-  //   ).isNewUser();
+  //   var modalN = document.getElementById("New_User");
+  //   modalN.style.display = "block";
+  //   popup_close_new_user();
+  // }
+
+  // function popup_close_new_user()
+  // {
+  //   var spanN = document.getElementsByClassName("close_popup")[3];
+  //   var modalN = document.getElementById("New_User");
+
+  //   spanN.onclick = function() 
+  //   {
+  //     modalN.style.display = "none";
+  //   }
   // }
 
   function id_from_string(len_stem, str)
   {
     return str.slice(len_stem, str.length);
   }
+
+  function set_category_emails()
+  {
+    var category_emails = document.getElementById("msg_email");
+    category_emails.innerHTML = "";
+    var option;
+
+    google.script.run.withSuccessHandler((employees)=>
+      {
+        for (var i = 0 ; i < employees.list_names.length ; i++)
+        {
+          option = document.createElement("option");
+          option.text = employees.list_names[i];
+          option.value = employees.list_email[i];
+          category_emails.appendChild(option);
+        }
+      }
+    ).getUserEmails();
+  }
+
+  function set_information()
+  {
+    google.script.run.withSuccessHandler((data)=>
+      {
+        for (var i = 1 ; i <= data.data.length ; i++)
+        {
+          document.getElementById("name"+i.toString()).innerHTML = data.data[i-1][0];
+          document.getElementById("statusT"+i.toString()).innerHTML = data.data[i-1][1];
+          document.getElementById("noteT"+i.toString()).innerHTML = data.data[i-1][2];
+          // alert(data.data.length)
+        }
+        
+        set_colors_status();
+        create_list_names();
+        alert_msg();
+      }
+    ).data_from_ss()
+  }
+
+  function retrieve_calendar10()
+  {
+    google.script.run.withSuccessHandler((x)=>
+    {
+      list_events = x;
+      alert(list_events)
+    }
+    ).read_ss_calendars();
+  }  
+
 </script>

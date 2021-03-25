@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_top">
+    <!-- Including css style-->
+    <?!= include("page-css"); ?>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Dashboard</title>
+</head>
+<body>
+    <table class="date">
+        <tr>
+          <th style="background-color: white; color: black; width:33%;">
+            <div style="text-align: left;">
+              <button class="button button1" onclick="popup_modification()"> <i class="material-icons">create</i></button>
+              <button class="button button1" id="Btn_popup" onclick="popup()"> <i class="material-icons">mail</i> </button>
+              <button class="button button1" id="btn_booking" onclick="popup_booking()"> <i class="material-icons">today</i> </button>
+            </div>
+          </th>
+          <th style="background-color: white; color: black; width:33%;">
+            <h2 style="text-align: center;">ダッシュボード・シルク・ラボラトリ</h2>
+          </th>
+          <th style="background-color: white; color: black; width:33%;">
+            <div class="user">
+              <p id="date_top_page">date</p>
+              <p id="current-user">User</p>
+              <!-- Trigger/Open The Modal -->
+            </div>
+          </th>
+        </tr>
+      </table>
+
+      <table border="0" cellspacing="0" cellpadding="0" id="table-main">
+        <!--Headers-->
+        <tr>
+          <th style="width:1%"></th>            
+          <th style="width:14%">氏名</th>       
+          <th style="width:15%">状態</th>
+          <th style="width:25%">メモ</th>
+          <!-- <th style="width:5%"></th> Edit/Save button -->
+          <th style="width:20%">
+            <p> スケジュール </p>
+            <i class="arrow-disabled" id="previous-date"> <i class="material-icons">fast_rewind</i></i>
+            <i style="font-style: normal;" id="schedule-date"></i>
+            <i class="arrow-disabled" id="following-date"> <i class="material-icons">fast_forward</i></i>
+          </th>
+          <th style="width:25%">会議室</th>
+        </tr>
+        
+      </table>
+      <div class="loader" id="table-loader">
+
+      </div>
+      <!-- Message Pop-up -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <span class="close_popup">&times;</span>
+            <h2>伝言</h2>
+          </div>
+          <div id="memo-div">
+            <p>社員を選択：　</p>
+            <select class="select_email" id="msg_email">
+            </select><br>
+            <p>伝言の入力：　</p>
+            <textarea id="memo"></textarea><br><br>
+            <button class="button disabled" id="send_message" onclick="send_message()" disabled> <i class="material-icons">send</i> </button>
+          </div>  
+        </div>
+      </div>  
+      <!--  -->
+      <?!= include("welcome-js"); ?>
+</body>
+</html>

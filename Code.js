@@ -1,8 +1,9 @@
-var meeting_calendar_id = 'c_dmhmoef7aksb1hiu0n2taobjhk@group.calendar.google.com';
-// var meeting_calendar_id = 'c_k8u5g1urpvnqvh0tpovu43cr3k@developer.gserviceaccount.com';
+//var meeting_calendar_id = 'c_dmhmoef7aksb1hiu0n2taobjhk@group.calendar.google.com';
+ var meeting_calendar_id = 'c_k8u5g1urpvnqvh0tpovu43cr3k@developer.gserviceaccount.com';
 // var arubaito_calendar_id = 'silk.co.jp_p6079i696o6uajq49ijl3mgk94@group.calendar.google.com'
 var reserveDate='nada';
-var url_ss = "https://docs.google.com/spreadsheets/d/1p7kIRtdrElo-QaKkrnGTjE8DTch23OrmHag8gDJRgqU/edit#gid=0";
+//var url_ss = "https://docs.google.com/spreadsheets/d/1p7kIRtdrElo-QaKkrnGTjE8DTch23OrmHag8gDJRgqU/edit#gid=0";
+  var url_ss = "https://docs.google.com/spreadsheets/d/1Om1kYwsVAISmAS8LnI8S2_INkpf0Q33-35GLhbY_jp0/edit#gid=0";
 var email_main_access = "part-timer@silk.co.jp"
 
 
@@ -11,10 +12,15 @@ function doGet(e)
   // read_calendar();
   // read_calendar_events_today();
   // Logger.log(JSON.stringify(e))
-  var x = isNewUser();
-  Logger.log(Session.getActiveUser().getEmail())
+  //var x = isNewUser();
   
-  if ( x != -1)
+  var x = 0;
+  //Logger.log(Session.getActiveUser().getEmail())
+  //Logger.log(x)
+  if(x==0){
+    return HtmlService.createTemplateFromFile("welcome").evaluate(); 
+  }
+  else if ( x != -1)
   {
     return HtmlService.createTemplateFromFile("new-user").evaluate(); 
   }

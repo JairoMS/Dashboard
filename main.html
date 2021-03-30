@@ -8,16 +8,10 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
-<<<<<<< HEAD
-    <!-- <? var datass = data_from_ss(); ?>
-    <? var userId = active_user().index; ?>
-    <? var booking_list = read_booking(); ?>
-=======
     <? var x = data_from_ss(); var datass = x.data; var userId = x.index ?>
     
->>>>>>> 2a742c39c2e44a1cc2cf8fef9043c5fe0cdfedb7
     <p id ="userId" hidden><?= userId ?></p>
-    <p id ="number_of_users" hidden><?= datass.length ?></p> -->
+    <p id ="number_of_users" hidden><?= datass.length ?></p>
     
     <table class="date">
       <tr>
@@ -27,6 +21,7 @@
             </button>
             <button class="button button1" id="Btn_popup" onclick="popup()"> <i class="material-icons">mail</i> </button>
             <button class="button button1" id="btn_booking" onclick="popup_booking()"> <i class="material-icons">today</i> </button>
+            <?var url = getScriptUrl();?><a href='<?=url?>?page=schedule'> <input type='button' name='button' value='schedule.html'></a>
           </div>
         </th>
         <th style="background-color: white; color: black; width:33%;">

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_top">
+    <!-- Including css style-->
+    <?!= include("schedule-css"); ?>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Dashboard</title>
+</head>
+<body>
+  <?var url = getScriptUrl();?><a href='<?=url?>?page=main'> <input type='button' name='button' value='main.html'></a>
+  <!-- <style>
+    table,th,td{
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .schedule-body, .user-name{
+      padding: 30px;
+    }
+
+    .user-name{
+      background-color: white;
+    }
+
+    .date-heading:nth-of-type(2),.schedule-body:nth-of-type(2){
+      background-color: rgb(66, 175, 66)
+    }
+
+   
+</style> -->
+    <table>
+      <thead>
+        <tr>
+          <th></td>
+          <th class="date-heading">Date 1</th>
+          <th class="date-heading">Date 2</th>
+          <th class="date-heading">Date 3</th>
+          <th class="date-heading">Date 4</th>
+          <th class="date-heading">Date 5</th>
+          <th class="date-heading">Date 6</th>
+          <th class="date-heading">Date 7</th>
+        </tr>
+      </thead>
+
+      <tbody id="table-body">
+        <!-- <tr class="data-body">
+          <td class="user-name">User 1</td>
+          <td class="schedule-body ">Something
+            <div class="loader"></div>
+          </td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+        </tr>
+        <tr class="data-body">
+          <td class="user-name">User 1</td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class="loader"></div></td>
+          <td class="schedule-body">Something<div class=""></div></td>
+        </tr> -->
+      </tbody>
+
+    </table>
+
+
+     <!-- <script>
+       const days=['Mon', 'Tues','Wed','Thurs','Fri','Sat','Sun']
+       let dates=[]
+       let rows=20;
+       for( let i=0;i<days.length;i++){
+         let date=new Date(new Date().setDate(new Date().getDate() + i));
+        dates.push(`${date.getMonth()}/${date.getDate()} (${days[date.getDay()]})`)
+       }
+       
+       var users=Array.from(document.getElementsByClassName('user-name'))
+       var dateHeading=Array.from(document.getElementsByClassName('date-heading'));
+       var tableBody=document.getElementById('table-body')
+
+       initialize()
+       tabulate(rows)
+
+       var ff=document.querySelectorAll('tr.data-body');
+       
+       console.log(ff[0].querySelectorAll('td.user-name'))
+       console.log(ff[0].querySelectorAll('td.schedule-body'))
+
+       function initialize(){
+         dateHeading.forEach((date,i)=>{
+            date.innerText=dates[i]
+         });         
+       }
+
+       function createRow(){
+           //create table row
+           let row=document.createElement('tr');
+           row.classList.add('data-body')
+
+           //create table data for user-name
+           let user_name=document.createElement('td')
+           user_name.classList.add('user-name')
+           row.appendChild(user_name)
+
+           //create table data for schedule
+           for(let j=0;j<7;j++){
+             const temp=document.createElement('td');
+             temp.classList.add('schedule-body')
+             row.appendChild(temp)
+           }
+
+         return row;
+
+       }
+
+       function tabulate(rows){
+        for(let i=0;i<rows;i++){
+          tableBody.appendChild(createRow());
+         }
+       }
+     </script> -->
+      <?!= include("schedule-js"); ?>
+</body>
+</html>

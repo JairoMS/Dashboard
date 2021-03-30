@@ -1,0 +1,88 @@
+<script>
+  const days=['Mon', 'Tues','Wed','Thurs','Fri','Sat','Sun']
+  let dates=[]
+  for( let i=0;i<days.length;i++){
+    let date=new Date(new Date().setDate(new Date().getDate() + i));
+   dates.push(`${date.getMonth()}/${date.getDate()} (${days[date.getDay()]})`)
+  }
+  
+  let users;
+  let dateHeading=Array.from(document.getElementsByClassName('date-heading'));
+  var tableBody=document.getElementById('table-body')
+
+  initialize();
+  data_from_ss();
+  read_calendar_date();
+
+  function initialize(){
+    dateHeading.forEach((date,i)=>{
+       date.innerText=dates[i]
+    });         
+  }
+
+  function createRow(){
+      //create table row
+      let row=document.createElement('tr');
+      row.classList.add('data-body')
+
+      //create table data for user-name
+      let user_name=document.createElement('td')
+      user_name.classList.add('user-name')
+      row.appendChild(user_name)
+
+      //create table data for schedule
+      for(let j=0;j<days.length;j++){
+        const temp=document.createElement('td');
+        temp.classList.add('schedule-body')
+        temp.innerHTML='<div class="loader"></div>'
+        row.appendChild(temp)
+      }
+
+    return row;
+
+  }
+
+  function createTable(rows){
+   for(let i=0;i<rows;i++){
+     tableBody.appendChild(createRow());
+    }
+  }
+
+  function data_from_ss(){
+    google.script.run.withSuccessHandler(data=>{
+      //get number of rows
+      let row=data['data'].length;
+      createTable(row)
+
+      var ff=document.querySelectorAll('tr.data-body');
+
+      users=Array.from(document.getElementsByClassName('user-name'))
+      
+      data['data'].forEach((d,i)=>{
+        ff[i].querySelectorAll('td.user-name')[0].innerText=d[0];
+      });
+    }
+    ).data_from_ss()
+  }
+
+  function read_booking(){
+    return google.script.run.withSuccessHandler(data=>{
+      console.log(data);
+    }
+    ).read_booking()
+  }
+
+  function read_calendar_date(){
+    return google.script.run.withSuccessHandler(data=>{
+      result=data;
+      var ff=document.querySelectorAll('tr.data-body');
+      result.forEach((d,i)=>{
+        d.forEach((ip,j)=>{
+          ff[j].querySelectorAll('td.schedule-body')[i].innerText=(ip.trim()===''?'なし':ip);
+        })
+        
+      })
+    }).read_calendar_date_week()
+  }
+
+</script>

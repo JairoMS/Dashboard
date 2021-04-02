@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_top">
+    <!-- Including css style-->
+    <?!= include("schedule-css"); ?>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Dashboard</title>
+</head>
+<body>
+  <div style="text-align: center;">
+    <?var url = getScriptUrl();?><a href='<?=url?>?page=main'> <button class="button button1" id="Btn_popup"> <i class="material-icons">	home </i> </button> </a>
+  </div>
+  <br>  
+    <table>
+      <thead>
+        <tr>
+          <th></td>
+          <th class="date-heading">Date 1</th>
+          <th class="date-heading">Date 2</th>
+          <th class="date-heading">Date 3</th>
+          <th class="date-heading">Date 4</th>
+          <th class="date-heading">Date 5</th>
+          <th class="date-heading">Date 6</th>
+          <th class="date-heading">Date 7</th>
+        </tr>
+      </thead>
+
+      <tbody id="table-body">
+      </tbody>
+    </table>
+      <?!= include("schedule-js"); ?>
+</body>
+</html>

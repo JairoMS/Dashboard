@@ -1,0 +1,113 @@
+<style>
+    body
+    {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    table
+    {
+      width: 90%;
+      margin: 0 auto;
+      border-collapse: collapse; 
+      border-radius: 6px;
+      -moz-border-radius:6px;
+    }
+    
+    th,td
+    {
+        border: 2px solid;
+        border-color: #34a0d1;
+        height: 70px;
+    }
+
+    thead
+    {
+      background-color: #34a0d1;
+      height: 50px;
+    }
+
+    .schedule-body{
+      padding: 30px;
+    }
+
+    .user-name{
+      padding: 40px 5px;
+    }
+
+    .user-name,.schedule-body{
+        width: 10%;
+    }
+
+    .user-name{
+      background-color: white;
+      text-align: center;
+      color: black;
+    }
+
+    .date-heading:nth-of-type(2),.schedule-body:nth-of-type(2){
+      background-color: #34a0d1;
+    }
+
+    .loader {
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 8px solid #1e76be;
+    width: 30px;
+    height: 30px;
+    -webkit-animation: spin 1.5s linear infinite; /* Safari */
+    animation: spin 1.5s linear infinite;
+    cursor: wait;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+   /* Safari */
+   @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .button {
+    background-color: #1e76be;
+    border: none;
+    color: white;
+    padding: 8px 25px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 3px 1px;
+    transition-duration: 0.2s;
+    cursor: pointer;
+  }
+
+  .disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    /* border-radius: 10%; */
+    border-radius: 25px;
+    border: 2px solid #1e76be;
+  }
+
+  .button1 {
+    background-color: white; 
+    color: black; 
+    border: 2px solid #1e76be;
+    /* border-radius: 10%; */
+    border-radius: 25px;
+    width: auto;
+  }
+
+  .button1:hover {
+    background-color: #1e76be;
+    color: white;
+    box-shadow: 0 8px 10px 0 rgba(0,0,0,0.24),0 8px 10px 0 rgba(0,0,0,0.19);
+  } 
+</style>

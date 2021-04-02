@@ -4,30 +4,408 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    font-family: 'Yusei Magic', sans-serif;
+    /* align-items: center; */
+    font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro",Osaka, "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
   table 
   {
-    
-    font-family: 'M PLUS Rounded 1c',arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
+    border-collapse: separate;
+    width: 90%;
+    /* border: none; */
+    border: 2px solid;
+    border-color: #34a0d1;
+
+    border-radius: 6px;
+    -moz-border-radius:6px;
+    margin-left:auto; 
+    margin-right:auto;
+  }
+
+  table.date 
+  {
+    width: 90%;
+    border: none;
+    border-color: white;
+    -moz-border-radius:6px;
+    margin-left:auto; 
+    margin-right:auto;
   }
 
   td, th 
   {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
+    /* border: 1px solid #dddddd; */
+    text-align: center;
+    padding: 0px;
+    /* border-radius: 25px; */
   }
 
-  th{
+  th // header
+  {
+    text-align: center;
+    background-color: #34a0d1;
+    border-top: none;
+  }
+
+  td:first-child, th:first-child {
+     border-left: none;
+  }
+
+  tr
+  {
+    height: 10px;
+  }
+
+  tr:nth-child(odd) 
+  {
+    background-color: #34a0d1;
+    color: white;
+  }
+
+  div.user
+  {
+    text-align: right; 
+    width: 95%;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .button {
+    background-color: #1e76be;
+    border: none;
+    color: white;
+    padding: 8px 25px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 3px 1px;
+    transition-duration: 0.2s;
+    cursor: pointer;
+  }
+
+  .disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    /* border-radius: 10%; */
+    border-radius: 25px;
+    border: 2px solid #1e76be;
+  }
+
+  .button1 {
+    background-color: white; 
+    color: black; 
+    border: 2px solid #1e76be;
+    /* border-radius: 10%; */
+    border-radius: 25px;
+    width: auto;
+  }
+
+  .button1:hover {
+    background-color: #1e76be;
+    color: white;
+    box-shadow: 0 8px 10px 0 rgba(0,0,0,0.24),0 8px 10px 0 rgba(0,0,0,0.19);
+  }
+
+  input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+  }
+
+  input[type=date] {
+    width: 40%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+  }
+
+  input[type=time] {
+    width: 40%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+  }
+
+  select {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+  }
+
+  select.select_email {
+    width: 60%;
+    padding: 12px 20px;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+  }
+
+  /* loader */
+  .loader {
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 8px solid #1e76be;
+    width: 30px;
+    height: 30px;
+    -webkit-animation: spin 1.5s linear infinite; /* Safari */
+    animation: spin 1.5s linear infinite;
+    cursor: wait;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Remove margins and padding from the list */
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Style the list items blue rows */
+  /* ul.blue li {
+    cursor: pointer;
+    position: relative;
+    padding: 12px 8px 12px 40px;
+    list-style-type: none;
+    background: #34a0d1;
+    font-size: 14px;
+    transition: 0.2s;
+    
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  } */
+
+  /* Darker background-color on hover */
+  /* ul.blue li:hover {
+    background: #2f8cb8;
+  } */
+
+  /* ul.blue li.checked {
+    background: #266f91;
+    color: #fff;
+    text-decoration: line-through;
+  } */
+
+  /* Style the list items white rows*/
+  ul.white li {
+    /* cursor: pointer; */
+    position: relative;
+    padding: 12px 8px 12px 40px;
+    list-style-type: none;
+    background: white;
+    font-size: 14px;
+    transition: 0.2s;
+    
+    /* make the list items unselectable */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Darker background-color on hover */
+  ul.white li:hover {
+    background: #ebebeb;
+  }
+
+  ul.white li.checked {
+    background: #888;
+    color: #fff;
+    text-decoration: line-through;
+  }
+
+  /* Style the close button */
+  .close {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 12px 16px 12px 16px;
+  }
+
+  .close:hover {
+    background-color: #f44336;
+    color: white;
+  }
+
+  /* The Modal (background) */
+  /* Modal Content message */
+  .modal 
+  {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0px;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    /* overflow: auto; Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+
+  
+  .modal-content 
+  {
+    position: relative;
+    top: 100px;
+    background-color: #ffffff;
+    margin: auto;
+    padding: 0;
+    border-radius: 25px;
+    border: 6px solid #34a0d1;
+    width: 51%;
+    height: 60%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.5s;
+    animation-name: animatetop;
+    animation-duration: 0.5s;
     text-align: center;
   }
 
-  tr:nth-child(even) 
+  /* Add Animation */
+  @-webkit-keyframes animatetop 
   {
-    background-color: #8bb56d;
+    from {top:100px; opacity:0} 
+    to {top:100px; opacity:1}
+  }
+
+  @keyframes animatetop 
+  {
+    from {top:100px; opacity:0}
+    to {top:100px; opacity:1}
+  }
+
+  /* The Close Button */
+  .close_popup 
+  {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close_popup:hover,
+  .close_popup:focus 
+  {
+    color: #135370;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-header 
+  {
+    padding: 1px 20px;
+    border-radius: 10px;
+    background-color: #34a0d1;
+    color: white;
+    border: 2px;
+  }
+
+  .modal-body {padding: 2px 16px;}
+
+  /* Text box to write message */
+  textarea 
+  {
+    padding: 12px 20px;
+    border: 2px solid #1e76be;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+    height: 150%; 
+    width: 55%;
+  }
+
+  /* Arrows to change date */
+  i.arrow 
+  {
+    cursor: pointer;
+    display: inline-block;
+    padding: 1px;
+    font-size: 30px;
+    vertical-align: -15%;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+  }
+
+  i.arrow-disabled
+  {
+    display: inline-block;
+    padding: 1px;
+    font-size: 30px;
+    color: #1e76be;
+    cursor: not-allowed;
+    vertical-align: -15%;
+    text-align: center;
+    width: 40px;
+    height: 40px;
+  }
+
+  .arrow:hover
+  {
+    /* background-color: #1e76be; */
+    color: white;
+    /* border-radius: 50px;
+    box-shadow: 0 8px 10px 0 rgba(0,0,0,0.24),0 8px 10px 0 rgba(0,0,0,0.19); */
+    font-size: 30px;
+    text-align: center;
+    width: 40px;
+    height: 40px;
+  }
+
+  i.edit
+  {
+    cursor: pointer;
+    display: inline-block;
+    padding: 1px;
+    font-size: 30px;
+    vertical-align: center;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+  }
+
+  .edit:hover
+  {
+    background-color: #1e76be;
+    color: white;
+    border-radius: 60px;
+    box-shadow: 0 8px 10px 0 rgba(0,0,0,0.24),0 8px 10px 0 rgba(0,0,0,0.19);
+    font-size: 30px;
+  }
+
+  p.status
+  {
+    text-align: center;
+    color: black;
+    font-weight: bold;
+    border-radius: 16px;
+    box-shadow: 0 8px 10px 0 rgba(0,0,0,0.24),0 8px 10px 0 rgba(0,0,0,0.19);
   }
 </style>

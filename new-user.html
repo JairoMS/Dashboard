@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Including css style-->
+    <?!= include("page-css"); ?>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  </head>
+  <body>
+    <? var user_email = isNewUser(); ?>
+    <div class="modal" style="display: block">
+      <div class="modal-content" style="height: 40%;">
+        <div class="modal-header">
+          <br>
+          <h2>新規ユーザー</h2>
+        </div>
+          <p>ユーザーメール：　<?= user_email ?></p>
+          <label>氏名の入力：　</label>
+          <input id="new_user" onmousemove="remove_disabled()" type="text" style="width: 30%;" placeholder="例：森田裕樹">
+          <br>
+          <br>
+          <button id="button_save_new_user" class="button disabled" disabled> <i class="material-icons">save</i> </button>
+      </div>
+    </div>
+  </body>
+  <script>
+
+    function remove_disabled()
+    {
+      var input_name = document.getElementById("new_user");
+      // alert(input_name.value)
+      
+      if ( (input_name.value.search("例：") == -1) && (input_name.value != "") ) 
+      {
+        document.getElementById("button_save_new_user").removeAttribute("disabled");
+        document.getElementById("button_save_new_user").setAttribute("class","button button1");
+        document.getElementById("button_save_new_user").setAttribute("onclick","save_new_user()");
+      }
+      
+    }
+    
+    function save_new_user()
+    {
+      google.script.run.withSuccessHandler(()=>
+        {
+          google.script.run.withSuccessHandler(function(url)
+          {
+            window.open(url,'_top');
+          }).getScriptURL();
+        }
+      ).add_new_user(document.getElementById("new_user").value);
+      
+    }
+    
+  </script>  
+</html>

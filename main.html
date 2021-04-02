@@ -4,83 +4,198 @@
     <base target="_top">
     <!-- Including css style-->
     <?!= include("page-css"); ?>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
-    <? var datass = data_from_ss(); ?>
-    <? var userId = active_user(); ?>
-    <h2>ダッシュボード・シルク・ラボラトリ</h2>
-    <table style="width:90%">
+    <? var x = data_from_ss(); var datass = x.data; var userId = x.index ?>
+    
+    <p id ="userId" hidden><?= userId ?></p>
+    <p id ="number_of_users" hidden><?= datass.length ?></p>
+    
+    <table class="date">
+      <tr>
+        <th style="background-color: white; color: black; width:33%;">
+          <div style="text-align: left;">
+            <button class="button button1" id="<?= "btn"+(userId).toString()?>" onclick="popup_modification()"> <i class="material-icons">create</i>
+            </button>
+            <button class="button button1" id="Btn_popup" onclick="popup()"> <i class="material-icons">mail</i> </button>
+            <button class="button button1" id="btn_booking" onclick="popup_booking()"> <i class="material-icons">date_range</i> </button>
+            <? var url = getScriptUrl();?> <a href='<?=url?>?page=schedule'> <button class="button button1" id="all_schedule"> <i class="material-icons">view_module</i> </button> </a>
+          </div>
+        </th>
+        <th style="background-color: white; color: black; width:33%;">
+          <h3 style="text-align: center;">ダッシュボード・シルク・ラボラトリ</h3>
+        </th>
+        <th style="background-color: white; color: black; width:33%;">
+          <div class="user">
+            <p id = "date_top_page">date</p>
+            <p id = "name_of_user"></p>
+            <!-- Trigger/Open The Modal -->
+          </div>
+        </th>
+      </tr>
+    </table>
+    <table border="0" cellspacing="0" cellpadding="0">
       <!--Headers-->
       <tr>
-        <th style="width:5%"></th>            
-        <th style="width:10%">氏名</th>       
-        <th style="width:10%">状態</th>
+        <th style="width:1%"></th>            
+        <th style="width:15%">氏名</th>       
+        <th style="width:14%">状態</th>
         <th style="width:25%">メモ</th>
-        <th style="width:20%">スケジュール</th>
-        <th style="width:10%"></th> <!--Edit/Save button-->
-        <th style="width:20%">会議室</th>
-      </tr>
-      <? for (var i = 0 ; i < datass.length ; i++){?>
-      <!--Person info-->
-      <tr>
-        <!--Number-->
-        <td><?= i+1 ?></td>
-        <!--Name-->
-        <td> 
-          <p id = "<?= "name"+(i+1).toString()?>"> <?= datass[i][0]?> </p>
-        </td>
-        <td>
-          <!--Status list-->
-          <select id="<?= "status"+(i+1).toString()?>" hidden>
-            <option value="no_selec"></option>
-            <option value="出社">出社</option>
-            <option value="外出">外出</option>
-            <option value="帰宅">帰宅</option>
-            <option value="直行">直行</option>
-            <option value="直帰">直帰</option>
-            <option value="食事">食事</option>
-            <option value="休み">休み</option>
-            <option value="自宅作業">自宅作業</option>
-          </select>
-          <p id = "<?= "statusT"+(i+1).toString()?>"> <?= datass[i][1]?> </p>
-        </td>
-        <!--Note-->
-        <td>
-          <input type="text" id="<?= "note"+(i+1).toString()?>" value = "<?= datass[i][2]?>" hidden>
-          <p id = "<?= "noteT"+(i+1).toString()?>"><?= datass[i][2]?></p>
-        </td>
-        <!--Schedule-->
-        <td>
-          <p id = "<?= "schedule"+(i+1).toString()?>"><?!= datass[i][3]?></p>
-        </td>
-        <td>
-          <? if ((i+1)==userId) { ?>
-            <button id="<?= "btn"+(i+1).toString()?>" onclick="edit_button(this.id)"> 編集 </button>
-          <? } else { ?>
-            <button id="<?= "btn"+(i+1).toString()?>" onclick="edit_button(this.id)" disabled> 編集 </button>
-          <? } ?>
-          <button id="<?= "btnSave"+(i+1).toString()?>" onclick="save_button(this.id)" hidden> 保存 </button>
-        </td> 
-        <td>
-          <? if ((i+1)==userId) { ?>
-            <button id="<?= "buttonBook"+(i+1).toString()?>" onclick="booking(this.id)"> 予約 </button>
-          <? } else { ?> 
-            <button id="<?= "buttonBook"+(i+1).toString()?>" onclick="booking(this.id)" disabled> 予約 </button>
-          <? } ?> 
-          <div id= "<?= "calendar"+(i+1).toString()?>" hidden> 
-            <label>日付: </label>    <input type = "date" id="<?= "Date"+(i+1).toString()?>"><br>
-            <label>開始時刻: </label> <input type = "time" id="<?= "StartTime"+(i+1).toString()?>"><br>
-            <label>終了時刻: </label> <input type = "time" id="<?= "FinishTime"+(i+1).toString()?>"><br>
-            <button id="<?= "saveBooking"+(i+1).toString()?>" onclick="save_booking(this.id)"> 保存 </button>
-            <button id="<?= "cancelBooking"+(i+1).toString()?>" onclick="cancel_booking(this.id)"> キャンセル </button>
+        <!-- <th style="width:5%"></th> Edit/Save button -->
+        <th style="width:20%">
+          <p> スケジュール </p>
+          <i class="arrow-disabled" id="previous-date"> <i class="material-icons">fast_rewind</i></i>
+          <i style="font-style: normal;" id="schedule-date"></i>
+          <i class="arrow-disabled" id="following-date"> <i class="material-icons">fast_forward</i></i>
+        </th>
+        <th style="width:25%">
+          <p> 会議室 </p>
+          <div id="shown_calendar1">
+            <i class="arrow-disabled" id="shown_icon_calendar1" onclick="toggle_icon(this.id)"> <i class="material-icons">looks_one</i></i>
           </div>
-          <p id="<?= "calendarT"+(i+1).toString()?>" hidden></p> 
-          <button id="<?= "deleteBooking"+(i+1).toString()?>" onclick="delete_booking(this.id)" hidden> 削除 </button>
-        </td> 
+          <div id="shown_calendar2" hidden>  
+            <i class="arrow" id="shown_icon_calendar2" onclick="toggle_icon(this.id)"> <i class="material-icons">looks_two</i></i>
+          </div>  
+        </th>  
       </tr>
+      <? var i; for (var ii = 0 ; ii <= datass.length ; ii++){?>
+      <? if (ii == 0) {i = userId-1;} else if (ii == userId ) {continue;} else {i = ii-1;} ?>
+        <!--Person info-->
+        <tr>
+          <!--Number-->
+          <td>
+            <p hidden><?= i+1 ?></p>
+          </td>
+          <!--Name-->
+          <td> 
+            <p id = "<?= "name"+(i+1).toString()?>" style="text-align: center;"> 読み込み中 </p>
+          </td>
+          <!--Status-->
+          <td>
+            <div style="width: 100%;">
+             <p class="status" id = "<?= "statusT"+(i+1).toString()?>"> </p>
+            </div>
+          </td>
+          <!--Note-->
+          <td>
+            <div>
+              <p id = "<?= "noteT"+(i+1).toString()?>" >  読み込み中
+              </p>
+            </div>
+          </td>
+          <!--Schedule-->
+          <td>
+            <p id = "<?= "schedule"+(i+1).toString()?>" hidden></p>
+            <? if ((i+1)==userId) { ?>
+              <div class="loader" id="<?= "LoaderSchedule"+(i+1).toString()?>" ></div>
+            <? } else { ?>
+            <div class="loader" id="<?= "LoaderSchedule"+(i+1).toString()?>" hidden></div>  
+            <!-- <p id="<?= "LoaderSchedule"+(i+1).toString()?>" hidden>
+              <i class="material-icons" style="cursor: pointer;">today</i>
+            </p> -->
+            <? } ?> 
+          </td>
+          <!-- Room booking -->
+          <td>
+            <? if ((i+1)==userId) { ?>
+              <ul id = "<?= "List"+(i+1).toString()?>">
+              </ul>
+              <p style="text-align: center;" id="<?= "calendarT"+(i+1).toString()?>" hidden></p>
+            <? } else { ?> 
+              <p style="text-align: center;" id="<?= "calendarT"+(i+1).toString()?>"> 
+              </p>
+            <? } ?> 
+            <div class="loader" id="<?= "Loader"+(i+1).toString()?>" hidden></div>
+            <div style="text-align: center;">
+              <button class="button disabled" id="<?= "deleteBooking"+(i+1).toString()?>" onclick="delete_booking(this.id)" hidden> <i class="material-icons">delete</i></button>
+            </div>  
+          </td> 
+        </tr>
       <? } ?>  
     </table>
+    <!-- <? var data = getUserEmails(); ?> -->
+    <!-- Message Pop-up -->
+    <div id="myModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close_popup">&times;</span>
+          <h2>伝言</h2>
+        </div>
+        <div id="memo-div">
+          <p>社員を選択：　</p>
+          <select class="select_email" id="msg_email">
+            <!-- <? for (var i = 0; i < data.list_names.length; i++) { ?>
+                  <option value="<?= data.list_email[i] ?>" ><?= data.list_names[i] ?></option>
+            <? } ?>   -->
+          </select><br>
+          <p>伝言の入力：　</p>
+          <textarea id="memo"></textarea><br><br>
+          <button class="button disabled" id="send_message" onclick="send_message()" disabled> <i class="material-icons">send</i> </button>
+        </div>  
+      </div>
+    </div>  
+    <!--  -->
+    <div id="myModal_reservation" class="modal">
+      <div class="modal-content" style="height: 50%;">
+        <div class="modal-header">
+          <span class="close_popup">&times;</span>
+          <h2>会議室予約</h2>
+        </div>
+        <div id= "<?= "calendar"+(userId).toString()?>"> 
+            <br>
+            <label> 会議室を選択： </label>
+            <select id="choose_room" style="width: 30%;">
+              <option value="room1"> 会議室１ </option>
+              <option value="room2"> 会議室２（テーブル）　</option>
+            </select>
+            <br>
+            <label>予約日: 　</label>    <input type = "date" id="<?= "Date"+(userId).toString()?>" onclick="flag_category=true;"><br>
+            <label>予約時刻：　</label>　
+              <select id="start_time" style="width: 22%;" onclick="set_category_time0(); flag_category2=true;"> 
+                <option>開始時刻</option>
+              </select> 
+            <label>~</label> 
+              <select id="end_time" style="width: 22%;" onclick="set_category_time_end()"> 
+                <option>終了時刻</option>
+              </select>
+            <br>
+            <br>
+            <button class="button button1" id="<?= "saveBooking"+(userId).toString()?>" onclick="save_booking(this.id)"> <i class="material-icons">save</i> </button>
+            <p id= "<?= "alert_calendar"+(userId).toString()?>" hidden>
+            </p>
+          </div> 
+      </div>
+    </div>
+    <div id="myModal_modification" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close_popup">&times;</span>
+          <h2>編集</h2>
+        </div>
+        <div>
+          <p>状態を選択：　</p>
+          <select id="<?= "status"+(userId).toString()?>" style = "width: 50%;">
+              <option value="出社">出社</option>
+              <option value="外出">外出</option>
+              <option value="帰宅">帰宅</option>
+              <option value="直行">直行</option>
+              <option value="直帰">直帰</option>
+              <option value="食事">食事</option>
+              <option value="休み">休み</option>
+              <option value="自宅作業">自宅作業</option>
+            </select>
+            <br>
+            <p>メモの入力：　</p>
+            <textarea id="<?= "note"+(userId).toString()?>"></textarea>
+            <br>
+            <br>
+            <button class="button button1" onclick="save_button()"> <i class="material-icons">save</i> </button>
+        </div>
+      </div>
+    </div>
     <!-- Including Java Script functions-->
     <?!= include("page-js"); ?>
   </body>

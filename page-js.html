@@ -9,12 +9,20 @@
   var list_time = [];
   var interval = [];
   var userId = document.getElementById("userId").innerHTML; 
+
+  console.log(userId)
+
   var flag_category = false;
   var flag_category2 = false;
   var list_name = [];
   const email_address_inbox = "https://mail.google.com/mail/u/0/#inbox";
   var email_current_user = "";
   const owner = "morita@silk.co.jp";
+
+
+  let all_schedule_button=document.getElementById('all-schedule')
+  all_schedule_button.onclick=load_all_schedules
+
 
   function create_list_names()
   {
@@ -84,7 +92,11 @@
 
   function load_schedule_info_oneself()
   {
+
+    
     var userId = document.getElementById("userId").innerHTML; 
+    console.log(userId)
+
     google.script.run.withSuccessHandler((x)=>
     {
       list_events[0] = x;
@@ -140,10 +152,7 @@
 
   function save_booking(buttonId)
   {
-    
-    // alert(document.getElementById("choose_room").value)
-    // return
-    
+
     var current_time = new Date();
     var bookingInfo = {};
     
@@ -215,11 +224,13 @@
       // display_booking(id_num);
       display_booking(id_num,icon_id);
       set_booking_info(icon_id);
+
     })
     .withFailureHandler((e)=>{
       document.getElementById("alert_calendar"+ id_num).innerHTML = "予約時間ご利用いただけません";
     })
     .saveBooking(bookingInfo, document.getElementById("choose_room").value);
+
     
   }
 
@@ -236,7 +247,7 @@
     {
       var icon_id = "icon2";
     }
-    
+
     var id_num = id_from_string(13, buttonId); // 13 is the length of the stem of the id "id="stem##"
     delete_items.row = id_num;
     delete_items.list = [];
@@ -460,7 +471,7 @@
       }
     }
   }
-
+  
   function refresh_data() 
   {
     setInterval( function() 
@@ -1014,6 +1025,7 @@
     var this_id = id_from_string("schedule".length, str);
     document.getElementById(str).setAttribute("hidden","");
     document.getElementById(str).removeAttribute("onclick")
+
     document.getElementById("LoaderSchedule"+this_id).removeAttribute("hidden");
     google.script.run.withSuccessHandler((schedule)=>
       {
@@ -1039,6 +1051,7 @@
     ).read_calendar_date_oneself(this_id);
   }
 
+
   function toggle_icon(id_icon) 
   {
     if (id_icon == "shown_icon_calendar1")
@@ -1057,6 +1070,57 @@
     set_booking_info(icon_id);
     display_booking(userId,icon_id);
     
+
+  function load_all_schedules(event){
+    for(let i=0;i<Number(number_of_users);i++){
+      if(i+1 !== Number(userId)){
+      document.getElementById(`schedule${i+1}`).innerHTML='<div class="loader"></div>'
+    }
+    }
+    google.script.run.withSuccessHandler((sch)=>
+      {
+        var ff=document.querySelectorAll('tr.data-body');
+        let step=1;
+        // alert(sch[0][5]);
+        sch.forEach((d,i)=>
+          {
+            
+                try{
+                  if((i+1)===Number(userId)){
+                    step+=-1;
+                  }else{
+                    document.getElementById(`schedule${i+step}`).innerHTML=(d[0].trim()===''?`<i class="material-icons" style="cursor: pointer;">today</i>`:d[0])
+                    if(d[0]===`?Check permissions`){
+                      document.getElementById(`schedule${i+step}`).style.color="red";
+                      document.getElementById(`schedule${i+step}`).innerHTML="カレンダーのアクセス権限を確認してくだい。";
+                    }
+                  }
+              }
+              catch(e){
+              console.log(e)
+              }
+            
+            
+            
+            // d.forEach((ip,j)=>
+            // {
+              
+            //   if (ip.trim()=="?Check permissions")
+            //   {
+            //     ff[i].querySelectorAll('td.schedule-body')[j].style.color = "red";
+            //     ff[i].querySelectorAll('td.schedule-body')[j].innerText = "カレンダーのアクセス権限を確認してくだい。";
+            //   }
+            //   else
+            //   {
+            //     ff[i].querySelectorAll('td.schedule-body')[j].innerText = (ip.trim()===''?' ':ip);
+            //   }  
+            // })  
+        });
+      }
+    ).read_weekly_calendar_ss();
+        
+    //console.log(`${event.target.id} pressed`)
+
   }
 
 </script>

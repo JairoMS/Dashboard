@@ -1,7 +1,5 @@
-
 const meeting_calendar_id = 'c_dmhmoef7aksb1hiu0n2taobjhk@group.calendar.google.com';
 const meeting_calendar_id2 = "c_q7jhaucsvp4c5l227gnoa9m1n8@group.calendar.google.com"
-
 var reserveDate='nada';
 var url_ss = "https://docs.google.com/spreadsheets/d/1p7kIRtdrElo-QaKkrnGTjE8DTch23OrmHag8gDJRgqU/edit#gid=0";
 var email_main_access = "part-timer@silk.co.jp"
@@ -33,26 +31,14 @@ var x=""
 
 function doGet(e) 
 {
-
-  // Logger.log(e)
-  x = isNewUser();
-  Logger.log(Session.getActiveUser().getEmail())
-   if (!e.parameter.page) {
-     // When no specific page requested, return "home page"
-     if ( x != -1)
-  {
-     return HtmlService.createTemplateFromFile("new-user").evaluate(); 
-   }
-   else
-   {
-     return HtmlService.createTemplateFromFile("main").evaluate();
+  Logger.log(e)
+  if (!e.parameter.page) {
+    // When no specific page requested, return "home page"
+    return HtmlService.createTemplateFromFile('main').evaluate();
   }
-     //return HtmlService.createTemplateFromFile('main').evaluate();
-   }
-   // else, use page parameter to pick an html file from the script
-   return HtmlService.createTemplateFromFile(e.parameter['page']).evaluate();
-  //return HtmlService.createTemplateFromFile("schedule").evaluate();
-
+  // else, use page parameter to pick an html file from the script
+  return HtmlService.createTemplateFromFile(e.parameter['page']).evaluate();
+    //return HtmlService.createTemplateFromFile("schedule").evaluate();
 }
 
 
@@ -70,7 +56,6 @@ function saveUser(userInfo)
     sheet.getRange(cell_status).setValue(userInfo.status.trim());
     sheet.getRange(cell_note).setValue(userInfo.note);
 }
-
 
 function saveBooking(bookingInfo,option)
 { 
@@ -92,8 +77,6 @@ function saveBooking(bookingInfo,option)
   var row = parseInt(bookingInfo.row)+1;
   var last_column = sheet.getRange(row,2).getValue()*2+3;
   var calendars = CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(calendar_id).getName());
-
-
   var start_time = new Date(bookingInfo.date + " " + bookingInfo.startTime);
   var end_time = new Date(bookingInfo.date + " " + bookingInfo.finishTime);
   start_time = new Date(start_time.getTime()-1000 * 60 * 60 * 14);
@@ -129,7 +112,6 @@ function saveBooking(bookingInfo,option)
   return true;
 }
 
-
 function deleteBooking(list,option)
 {
   var ss = SpreadsheetApp.openByUrl(url_ss);
@@ -146,7 +128,6 @@ function deleteBooking(list,option)
   }
 
   var sheet = ss.getSheetByName(sheet_name);
-
   var row = parseInt(list.row)+1;
   var c;
   var event_id = [];
@@ -165,9 +146,7 @@ function deleteBooking(list,option)
   sheet.getRange(row,2).setValue(num_booking);
   
  //会議室のカレンダーに登録してアクセスする / Subscribe to the meeting room calendar and access it
-
   var meeting_calendar=CalendarApp.getCalendarsByName(CalendarApp.subscribeToCalendar(calendar_id).getName());
-
   
   for (var i = 0 ; i<event_id.length ; i++)
   {
@@ -468,14 +447,7 @@ function read_calendar_date_oneself(oneself)
       }
       if (calendar_name !== email_main_access)
       {
-
-        try{
-          aCal.unsubscribeFromCalendar();
-        }catch(e){
-          Logger.log(e)
-        }
-        
-
+        aCal.unsubscribeFromCalendar();
       }
         
     }    
@@ -678,7 +650,6 @@ function active_user()
   return user;
 }
 
-
 function read_booking_active_user(row,option)
 {
   var ss = SpreadsheetApp.openByUrl(url_ss);
@@ -693,7 +664,6 @@ function read_booking_active_user(row,option)
   }
 
   var sheet = ss.getSheetByName(sheet_name);
-
   r = parseInt(row);
   c = sheet.getRange(r+1,2).getValue();
   data = [];
@@ -719,7 +689,6 @@ function read_booking_active_user(row,option)
   return data;
 }
 
-
 function read_booking(option)
 {
   var ss = SpreadsheetApp.openByUrl(url_ss);
@@ -734,7 +703,6 @@ function read_booking(option)
   }
 
   var sheet = ss.getSheetByName(sheet_name);
-
 
   var data_ss = sheet.getRange(2,2,sheet.getLastRow()-1,sheet.getLastColumn()-1).getValues();
   // Logger.log(data_ss)
@@ -772,9 +740,7 @@ function deleteBooking_trigger()
   }
   // Logger.log(list);
 
-
   // Lines below clear past bookings in room1
-
   var ss = SpreadsheetApp.openByUrl(url_ss);
   var sheet = ss.getSheetByName("Booking");
   var data_ss = sheet.getRange(2,3,sheet.getLastRow()-1,sheet.getLastColumn()-1).getValues();
@@ -846,9 +812,7 @@ function sendMessage(msg)
   Logger.log(msg.email)
   Logger.log(msg.memo)
   var subject = Session.getActiveUser().getEmail()+"が送ったダッシュボードからの伝言";
-
   GmailApp.sendEmail(msg.email, subject, msg.memo);
-
   var email_list = getUserEmails().list_email;
   var index = find_name(email_list,msg.email.trim())-1;
   SpreadsheetApp.openByUrl(url_ss).getSheetByName("Data").getRange(index+1,7).setValue("1");
@@ -1053,13 +1017,10 @@ function read_all_calendars_week()
             // sheetC.getRange(i+1,j+1).setValue(string_events); 
           }
           list_events[i][j] = string_events;
-
           if (j == 0)
           {
             sheet.getRange(i+2,5).setValue(string_events);
           }
-          
-
         }
         if (calendar_name !== email_main_access)
         {
@@ -1198,10 +1159,8 @@ function read_weekly_calendar_ss()
   return sheet.getRange(1,1,sheet.getLastRow(),7).getValues();
 }
 
-
 // function create_calendar()
 // {
 //   var calendar = CalendarApp.createCalendar('会議室予約２');
 //   Logger.log('Created the calendar "%s", with the ID "%s".',calendar.getName(), calendar.getId());
 // }
-

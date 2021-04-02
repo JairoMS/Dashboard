@@ -31,13 +31,23 @@ var x=""
 function doGet(e) 
 {
   // Logger.log(e)
-  // if (!e.parameter.page) {
-  //   // When no specific page requested, return "home page"
-  //   return HtmlService.createTemplateFromFile('main').evaluate();
-  // }
-  // // else, use page parameter to pick an html file from the script
-  // return HtmlService.createTemplateFromFile(e.parameter['page']).evaluate();
-  return HtmlService.createTemplateFromFile("schedule").evaluate();
+  x = isNewUser();
+  Logger.log(Session.getActiveUser().getEmail())
+   if (!e.parameter.page) {
+     // When no specific page requested, return "home page"
+     if ( x != -1)
+  {
+     return HtmlService.createTemplateFromFile("new-user").evaluate(); 
+   }
+   else
+   {
+     return HtmlService.createTemplateFromFile("main").evaluate();
+  }
+     //return HtmlService.createTemplateFromFile('main').evaluate();
+   }
+   // else, use page parameter to pick an html file from the script
+   return HtmlService.createTemplateFromFile(e.parameter['page']).evaluate();
+  //return HtmlService.createTemplateFromFile("schedule").evaluate();
 }
 
 
@@ -421,7 +431,12 @@ function read_calendar_date_oneself(oneself)
       }
       if (calendar_name !== email_main_access)
       {
-        aCal.unsubscribeFromCalendar();
+        try{
+          aCal.unsubscribeFromCalendar();
+        }catch(e){
+          Logger.log(e)
+        }
+        
       }
         
     }    

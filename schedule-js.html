@@ -78,7 +78,7 @@
       var ff=document.querySelectorAll('tr.data-body');
       result.forEach((d,i)=>{
         d.forEach((ip,j)=>{
-          ff[j].querySelectorAll('td.schedule-body')[i].innerText=(ip.trim()===''?'なし':ip);
+          ff[j].querySelectorAll('td.schedule-body')[i].innerText=ip;
         })
         
       })

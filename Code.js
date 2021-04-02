@@ -15,14 +15,14 @@ var email_main_access = "bohulu.ackah@silk.jp"
 
 function doGet(e) 
 {
-  Logger.log(e)
-  if (!e.parameter.page) {
-    // When no specific page requested, return "home page"
-    return HtmlService.createTemplateFromFile('main').evaluate();
-  }
-  // else, use page parameter to pick an html file from the script
-  return HtmlService.createTemplateFromFile(e.parameter['page']).evaluate();
-    //return HtmlService.createTemplateFromFile("schedule").evaluate();
+  // Logger.log(e)
+  // if (!e.parameter.page) {
+  //   // When no specific page requested, return "home page"
+  //   return HtmlService.createTemplateFromFile('main').evaluate();
+  // }
+  // // else, use page parameter to pick an html file from the script
+  // return HtmlService.createTemplateFromFile(e.parameter['page']).evaluate();
+  return HtmlService.createTemplateFromFile("schedule").evaluate();
 }
 
 function getScriptUrl() {

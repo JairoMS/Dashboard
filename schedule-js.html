@@ -1,9 +1,10 @@
 <script>
-  const days=['Mon', 'Tues','Wed','Thurs','Fri','Sat','Sun']
+  const days=['日', '月', '火',　'水',　'木',　'金',　'土'];
   let dates=[]
-  for( let i=0;i<days.length;i++){
+  for( let i=0 ; i<days.length ; i++)
+  {
     let date=new Date(new Date().setDate(new Date().getDate() + i));
-   dates.push(`${date.getMonth()}/${date.getDate()} (${days[date.getDay()]})`)
+    dates.push(`${date.getMonth()+1}月${date.getDate()}日 （${days[date.getDay()]}）`)
   }
   
   let users;
@@ -12,7 +13,7 @@
 
   initialize();
   data_from_ss();
-  read_calendar_date();
+  // read_calendar_date();
 
   function initialize(){
     dateHeading.forEach((date,i)=>{
@@ -20,24 +21,26 @@
     });         
   }
 
-  function createRow(){
+  function createRow()
+  {
       //create table row
-      let row=document.createElement('tr');
-      row.classList.add('data-body')
+    let row=document.createElement('tr');
+    row.classList.add('data-body')
 
-      //create table data for user-name
-      let user_name=document.createElement('td')
-      user_name.classList.add('user-name')
-      row.appendChild(user_name)
+    //create table data for user-name
+    let user_name=document.createElement('td')
+    user_name.classList.add('user-name')
+    row.appendChild(user_name)
 
-      //create table data for schedule
-      for(let j=0;j<days.length;j++){
-        const temp=document.createElement('td');
-        temp.classList.add('schedule-body')
-        temp.innerHTML='<div class="loader"></div>'
-        row.appendChild(temp)
-      }
-
+    //create table data for schedule
+    for(let j=0;j<days.length;j++)
+    {
+      const temp=document.createElement('td');
+      temp.classList.add('schedule-body')
+      temp.innerHTML='<div class="loader"></div>'
+      row.appendChild(temp)
+    }
+    
     return row;
 
   }
@@ -48,19 +51,22 @@
     }
   }
 
-  function data_from_ss(){
-    google.script.run.withSuccessHandler(data=>{
+  function data_from_ss()
+  {
+    google.script.run.withSuccessHandler(data=>
+    {
       //get number of rows
       let row=data['data'].length;
-      createTable(row)
+      createTable(row);
 
       var ff=document.querySelectorAll('tr.data-body');
 
-      users=Array.from(document.getElementsByClassName('user-name'))
+      users=Array.from(document.getElementsByClassName('user-name'));
       
       data['data'].forEach((d,i)=>{
         ff[i].querySelectorAll('td.user-name')[0].innerText=d[0];
       });
+      read_calendar_date();
     }
     ).data_from_ss()
   }
@@ -73,16 +79,38 @@
   }
 
   function read_calendar_date(){
-    return google.script.run.withSuccessHandler(data=>{
-      result=data;
-      var ff=document.querySelectorAll('tr.data-body');
-      result.forEach((d,i)=>{
-        d.forEach((ip,j)=>{
-          ff[j].querySelectorAll('td.schedule-body')[i].innerText=ip;
-        })
+    // return google.script.run.withSuccessHandler(data=>{
+    //   result=data;
+    //   var ff=document.querySelectorAll('tr.data-body');
+    //   result.forEach((d,i)=>{
+    //     d.forEach((ip,j)=>{
+    //       ff[j].querySelectorAll('td.schedule-body')[i].innerText=(ip.trim()===''?'なし':ip);
+    //     })
         
-      })
-    }).read_calendar_date_week()
-  }
+    //   })
+    // }).read_calendar_date_week();
 
+    google.script.run.withSuccessHandler((sch)=>
+      {
+        var ff=document.querySelectorAll('tr.data-body');
+        // alert(sch[0][5]);
+        sch.forEach((d,i)=>
+          {
+            d.forEach((ip,j)=>
+            {
+              
+              if (ip.trim()=="?Check permissions")
+              {
+                ff[i].querySelectorAll('td.schedule-body')[j].style.color = "red";
+                ff[i].querySelectorAll('td.schedule-body')[j].innerText = "カレンダーのアクセス権限を確認してくだい。";
+              }
+              else
+              {
+                ff[i].querySelectorAll('td.schedule-body')[j].innerText = (ip.trim()===''?' ':ip);
+              }  
+            })  
+        });
+      }
+    ).read_weekly_calendar_ss();
+  }
 </script>

@@ -1,28 +1,20 @@
 <!--Java Scrips functions-->
 <script>
-  
-  
-  //var datass = data_from_ss();
-  //var userId = active_user().index; 
-  //var booking_list = read_booking(); 
   var date_loading = new Date();
   var index_date = 0; // zero represents today date
-  var list_events;
+  var list_events = [];
   const colors = ["Chartreuse","BlanchedAlmond","BlueViolet","BurlyWood","Chocolate","DarkSeaGreen","DeepPink","Gold"];
   const status_color = ["出社","外出","帰宅","直行","直帰","食事","休み","自宅作業"];
-  //const number_of_users = document.getElementById("number_of_users").innerHTML;
-  //const number_of_users = datass.length;
-
+  const number_of_users = document.getElementById("number_of_users").innerHTML;
   var list_time = [];
   var interval = [];
+  var userId = document.getElementById("userId").innerHTML; 
   var flag_category = false;
   var flag_category2 = false;
   var list_name = [];
   const email_address_inbox = "https://mail.google.com/mail/u/0/#inbox";
   var email_current_user = "";
   const owner = "morita@silk.co.jp";
-
-  // alert(document.getElementById("userId").innerHTML)
 
   function create_list_names()
   {
@@ -33,56 +25,29 @@
   }
   
 
-  // (function()
-  //   {
-  //     //var userId = document.getElementById("userId").innerHTML;
-  //     //var userId = userId;
+  (function()
+    {
+      var initial_selection = document.getElementById("status"+userId).children;
+      var actual_status = document.getElementById("statusT"+userId).innerHTML;
+      if (actual_status.trim()=="")
+      {
+        return;
+      }
       
-  //     var initial_selection = document.getElementById("status"+userId).children;
-  //     var actual_status = document.getElementById("statusT"+userId).innerHTML;
-  //     if (actual_status.trim()=="")
-  //     {
-  //       return;
-  //     }
-      
-  //     var i;
+      var i;
 
-  //     for (i = 0 ; i<initial_selection.length ; i++)
-  //     {
+      for (i = 0 ; i<initial_selection.length ; i++)
+      {
         
-  //       if ( initial_selection[i].value.trim() == actual_status.trim() )
-  //       {
-  //         break;
-  //       }
-  //     }
+        if ( initial_selection[i].value.trim() == actual_status.trim() )
+        {
+          break;
+        }
+      }
       
-  //     initial_selection[i].setAttribute("selected","");
-  //   }
-  // )();
-
-  function data_from_ss(){
-    google.script.run.withSuccessHandler(data=>{
-      console.log(data)
-      return data;
+      initial_selection[i].setAttribute("selected","");
     }
-    ).data_from_ss()
-  }
-
-  function active_user(){
-    return google.script.run.withSuccessHandler(data=>{
-      console.log(data)
-      return data;
-    }
-    ).active_user()
-  }
-
-  function read_booking(){
-    return google.script.run.withSuccessHandler(data=>{
-      console.log(data)
-      return data;
-    }
-    ).read_booking()
-  }
+  )();
 
   function reservation_time()
   { 
@@ -117,49 +82,47 @@
     list_time[list_time.length] = "00:00"; 
   }
 
-  google.script.run.withSuccessHandler((x)=>
+  function load_schedule_info_oneself()
   {
-    var userId = document.getElementById("userId").innerHTML;
-    list_events = x;
-    document.getElementById("following-date").setAttribute("class","arrow");
-    document.getElementById("following-date").setAttribute("onclick","following_date()");
-
-    for (var i = 0 ; i < list_events[0].length ; i++)
+    var userId = document.getElementById("userId").innerHTML; 
+    google.script.run.withSuccessHandler((x)=>
     {
-      document.getElementById("LoaderSchedule"+(i+1).toString()).setAttribute("hidden","true");
-      document.getElementById("schedule"+(i+1).toString()).removeAttribute("hidden");
-      if ( list_events[0][i].toString().trim() == "?Check permissions" )
+      list_events[0] = x;
+      
+      document.getElementById("following-date").setAttribute("class","arrow");
+      document.getElementById("following-date").setAttribute("onclick","following_date()");
+  
+      document.getElementById("LoaderSchedule"+userId).setAttribute("hidden","true");
+      document.getElementById("schedule"+userId).removeAttribute("hidden");
+
+      if ( list_events[0].toString().trim() == "?Check permissions" )
       {
-        if ( (i+1) == userId || email_current_user == owner )
-        {
-          document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
-          document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
-        }
-        else
-        {
-          document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
-        }
+        document.getElementById("schedule"+userId).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+        document.getElementById("schedule"+userId).setAttribute("style","color:red;");  
       }
       else
       {
-        document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[0][i].toString().replace(/\n/g,"<br>");
+        document.getElementById("schedule"+userId).innerHTML = list_events[0].toString().replace(/\n/g,"<br>");
       }  
-      
-    }
-    // retrieve_calendar10();
-  }
-  ).read_calendar_date(); 
 
+      for (var i=1 ; i<=number_of_users ; i++)
+      {
+        if (i != userId) 
+        {
+          document.getElementById("schedule"+i.toString()).removeAttribute("hidden");
+          document.getElementById("schedule"+i.toString()).innerHTML = "<i class='material-icons' style='cursor: pointer;'>today</i>";
+          document.getElementById("schedule"+i.toString()).setAttribute("onclick","load_schedule(this.id)");
+        }   
+      }
+    }
+    ).read_calendar_date_oneself(userId);
+  }   
   
   function save_button()
   { 
-    // document.getElementById(buttonId).setAttribute("hidden","true");
-    
-
     var info = {};
-    // document.getElementById(buttonId).removeAttribute("hidden");
 
-    info.row = document.getElementById("userId").innerHTML;
+    info.row = userId;
     info.status = document.getElementById("status"+ info.row).value;
     info.note = document.getElementById("note"+ info.row).value;
 
@@ -198,14 +161,12 @@
     if (s_time > e_time) 
     {
       document.getElementById("alert_calendar"+ id_num).removeAttribute("hidden");
-      // document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
       document.getElementById("alert_calendar"+ id_num).innerHTML = "終了時刻は開始時刻より早くできません";
       return;
     }
     else if (s_time<current_time)
     {
       document.getElementById("alert_calendar"+ id_num).removeAttribute("hidden");
-      // document.getElementById("buttonBook"+ buttonId[11]).removeAttribute("hidden");
       document.getElementById("alert_calendar"+ id_num).innerHTML = "開始時刻を現在の時刻より早くできません ";
       return; 
     }
@@ -247,7 +208,6 @@
     var delete_items = {};
 
     var id_num = id_from_string(13, buttonId); // 13 is the length of the stem of the id "id="stem##"
-    // alert(buttonId)
     delete_items.row = id_num;
     delete_items.list = [];
     var index = 0;
@@ -268,9 +228,6 @@
       return;
     }
 
-    // document.getElementById("calendarT"+ buttonId[13]).setAttribute("hidden","true");
-    // document.getElementById("deleteBooking"+ buttonId[13]).setAttribute("hidden","true");
-    // document.getElementById("buttonBook"+ buttonId[13]).setAttribute("hidden","true");
     document.getElementById("List"+ id_num).setAttribute("hidden","true");
 
     document.getElementById("Loader"+ id_num).removeAttribute("hidden");
@@ -280,8 +237,6 @@
     google.script.run.withSuccessHandler(()=>{
       document.getElementById("Loader"+ id_num).setAttribute("hidden","true");
       document.getElementById("deleteBooking"+ id_num).setAttribute("hidden","");
-      // document.getElementById("buttonBook"+ buttonId[13]).removeAttribute("hidden");
-      // document.getElementById("DisplayB"+ buttonId[13]).removeAttribute("hidden");
 
       display_booking(id_num);
     }
@@ -290,19 +245,13 @@
 
   function display_booking(userId)
   {
-    //alert(userId)
     userId = userId.toString();
-    // document.getElementById("buttonBook"+ userId).setAttribute("hidden","true");
-    //　document.getElementById("DisplayB"+ userId).setAttribute("hidden","true");
     document.getElementById("Loader"+ userId).removeAttribute("hidden");
 
     google.script.run.withSuccessHandler((listBooking)=>
     {
       document.getElementById("Loader"+ userId).setAttribute("hidden","true");
-      // document.getElementById("cancelDisplay"+ userId).removeAttribute("hidden");
       document.getElementById("List"+ userId).removeAttribute("hidden");
-      // document.getElementById("deleteBooking"+ userId).removeAttribute("hidden");
-      // document.getElementById("buttonBook"+ userId).removeAttribute("hidden");
   
       if (listBooking[1]=="")
       {
@@ -316,15 +265,6 @@
       var list = document.getElementById(name_list);
       list.innerHTML = "";
 
-      // if (parseInt(listBooking[0])%2 == 0)
-      // {
-      //   document.getElementById(name_list).setAttribute("class","blue");
-      // }
-      // else
-      // {
-      //   document.getElementById(name_list).setAttribute("class","white");
-      // }
-
       document.getElementById(name_list).setAttribute("class","white");
 
       for (var i = 1; i < listBooking.length; i++) 
@@ -333,7 +273,6 @@
         var textnode = document.createTextNode(listBooking[i]);
         node.appendChild(textnode);
         node.setAttribute("id","li"+(i).toString());
-        // node.classList.add("checked");
         list.appendChild(node);
         
       }
@@ -351,7 +290,6 @@
     {
       var span = document.createElement("SPAN");
       var txt = document.createTextNode("\u00D7");
-      // var txt = document.createTextNode("\uf2ed");
       
       span.className = "close";
       span.setAttribute("id","b"+(i+1).toString());
@@ -409,17 +347,14 @@
   // This function is called after the page is loaded
   window.onload = function() 
   {
-    var userId = document.getElementById("userId").innerHTML;
     var dd = date_loading.getDate();
     var mm = date_loading.getMonth()+1;
     var yy = date_loading.getFullYear();
     var youbi = ['日','月','火','水','木','金','土'];
     var day_week = youbi[date_loading.getDay()];
 
-    // test_read_calendar();
     set_information();
     
-    // set_colors_status();
     set_category_emails();
 
     google.script.run.withSuccessHandler((user)=>
@@ -433,16 +368,11 @@
     
     document.getElementById("schedule-date").innerHTML = mm+"月"+dd+"日";
     document.getElementById("date_top_page").innerHTML = yy+"年"+mm+"月"+dd+"日"+"（"+day_week+"）";
-    // reLoad()
-    // alert_msg();
 
-    // display_booking(userId);
-    // set_booking_info();
+    load_schedule_info_oneself();
     refresh_data();
     reservation_time();
-    // alert(email_current_user);
-    // popup_new_user();
-    // is_new_user();
+    
   };
 
   function set_booking_info() 
@@ -465,7 +395,6 @@
     for (var i = 1 ; i <= number_of_users ; i++)
     { 
       string_status = document.getElementById("statusT"+i.toString()).innerHTML;
-      // alert(string_status)
       if (string_status == "　")
       {
         continue;
@@ -484,12 +413,11 @@
     {
       google.script.run.withSuccessHandler((data_refreshed)=>
         { 
-          var id_current_user = document.getElementById("userId").innerHTML;
+          var id_current_user = userId;
           var name_aux;
           for (var i = 0 ; data_refreshed.length ; i++ )
           {
             document.getElementById("noteT"+(i+1).toString()).innerHTML = data_refreshed[i][1];
-            // document.getElementById("schedule"+(i+1).toString()).innerHTML = data_refreshed[i][2];
             var new_color = status_color.indexOf(data_refreshed[i][0].trim());
             
             document.getElementById("statusT"+(i+1).toString()).innerHTML = data_refreshed[i][0];
@@ -579,7 +507,6 @@
         var modal = document.getElementById("myModal");
         modal.style.display = "none";
         var name_aux = list_name[index-1] +' '+'<i class="material-icons">message</i>';
-        var userId = document.getElementById("userId").innerHTML;
 
         document.getElementById("name"+index).innerHTML = name_aux;
         if (userId == index)
@@ -595,6 +522,7 @@
   function previous_date()
   {
     index_date --;
+
     if (index_date == 0)
     {
       document.getElementById("previous-date").setAttribute("class","arrow-disabled");
@@ -612,7 +540,7 @@
   function following_date()
   {
     index_date ++;
-
+    
     if (document.getElementById("previous-date").classList == "arrow-disabled")
     {
       document.getElementById("previous-date").setAttribute("class","arrow");
@@ -621,7 +549,7 @@
 
     if (index_date == list_events.length)
     {
-      display_new_date_schedule(index_date);
+      display_new_date_schedule_oneself(index_date);
     }
     
     display_date_schedule();
@@ -629,106 +557,179 @@
 
   function display_date_schedule() 
   { 
-    var day = date_loading.getDate()+index_date;
-    var month = date_loading.getMonth()+1;
-    var userId = document.getElementById("userId").innerHTML; 
-    
-    document.getElementById("schedule-date").innerHTML = month+"月"+day+"日";
+    var new_date = new Date();
+    new_date = new Date(new_date.getTime()+1000*60*60*24*index_date);
+    document.getElementById("schedule-date").innerHTML = (new_date.getMonth()+1).toString()+"月"+new_date.getDate() +"日";
 
-    for (var i = 0 ; i <number_of_users ; i++)
-    {
-      // document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[index_date][i].toString().replace(/\n/g,"<br>");
-      if ( list_events[index_date][i].toString().trim() == "?Check permissions" )
-        {
-          if ( (i+1) == userId || email_current_user == owner)
-          {
-            document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
-            document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
-          }
-          else
-          {
-            document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
-          }
-        }
-        else
-        {
-          document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[index_date][i].toString().replace(/\n/g,"<br>");
-        } 
-    }
+    if ( list_events[index_date].toString().trim() == "?Check permissions" )
+      {
+        document.getElementById("schedule"+userId).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+        document.getElementById("schedule"+userId).setAttribute("style","color:red;");
+        
+      }
+      else
+      {
+        document.getElementById("schedule"+userId).innerHTML = list_events[index_date].toString().replace(/\n/g,"<br>");
+      } 
+
   }
 
-  function display_new_date_schedule(index_date)
+  // function display_date_schedule() 
+  // { 
+  //   var day = date_loading.getDate()+index_date;
+  //   var month = date_loading.getMonth()+1;
+  //   var userId = document.getElementById("userId").innerHTML; 
+    
+  //   // document.getElementById("schedule-date").innerHTML = month+"月"+day+"日";
+
+  //   for (var i = 0 ; i <number_of_users ; i++)
+  //   {
+  //     // document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[index_date][i].toString().replace(/\n/g,"<br>");
+  //     if ( list_events[index_date][i].toString().trim() == "?Check permissions" )
+  //       {
+  //         if ( (i+1) == userId || email_current_user == owner)
+  //         {
+  //           document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+  //           document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
+  //         }
+  //         else
+  //         {
+  //           document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
+  //         }
+  //       }
+  //       else
+  //       {
+  //         document.getElementById("schedule"+(i+1).toString()).innerHTML = list_events[index_date][i].toString().replace(/\n/g,"<br>");
+  //       } 
+  //   }
+  // }
+
+  // function display_new_date_schedule(index_date)
+  // { 
+    
+  //   var flag = false;
+  //   var new_date = new Date();
+  //   new_date = new Date(new_date.getTime()+1000*60*60*24*index_date)
+
+  //   if (document.getElementById("previous-date").classList == "arrow-disabled")
+  //   {
+  //     flag = true;
+  //   }
+    
+  //   for (var i = 1 ; i <= number_of_users ; i++)
+  //   {
+  //     document.getElementById("schedule"+i.toString()).setAttribute("hidden","true");
+  //     document.getElementById("LoaderSchedule"+i.toString()).removeAttribute("hidden");
+  //   }
+    
+  //   document.getElementById("following-date").setAttribute("class","arrow-disabled");
+  //   document.getElementById("following-date").removeAttribute("onclick");
+
+  //   document.getElementById("previous-date").setAttribute("class","arrow-disabled");
+  //   document.getElementById("previous-date").removeAttribute("onclick");
+    
+  //   google.script.run.withSuccessHandler((schedule)=>
+  //   {
+  //     list_events[list_events.length] = schedule;
+    
+  //     document.getElementById("schedule-date").innerHTML = (new_date.getMonth()+1).toString()+"月"+new_date.getDate() +"日";
+      
+  //     for (var i = 0 ; i < schedule.length ; i++)
+  //     {
+  //       document.getElementById("schedule"+(i+1).toString()).removeAttribute("hidden");
+  //       document.getElementById("LoaderSchedule"+(i+1).toString()).setAttribute("hidden","true");
+        
+  //       // document.getElementById("schedule"+(i+1).toString()).innerHTML = schedule[i].toString().replace(/\n/g,"<br>");
+
+  //       if ( schedule[i].toString().trim() == "?Check permissions" )
+  //       {
+  //         if ( (i+1) == userId || email_current_user == owner)
+  //         {
+  //           document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+  //           document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
+  //         }
+  //         else
+  //         {
+  //           document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
+  //         }
+  //       }
+  //       else
+  //       {
+  //         document.getElementById("schedule"+(i+1).toString()).innerHTML = schedule[i].toString().replace(/\n/g,"<br>");
+  //       }  
+
+  //       if (!flag)
+  //       {
+  //         document.getElementById("previous-date").setAttribute("class","arrow");
+  //         document.getElementById("previous-date").setAttribute("onclick","previous_date()");
+  //       }
+  //       document.getElementById("following-date").setAttribute("class","arrow");
+  //       document.getElementById("following-date").setAttribute("onclick","following_date()");
+      
+  //     }
+  //   }).read_new_date(index_date);
+  // }
+
+  function display_new_date_schedule_oneself(index_date)
   { 
     
     var flag = false;
     var new_date = new Date();
-    new_date = new Date(new_date.getTime()+1000*60*60*24*index_date)
-
+    
+    new_date = new Date(new_date.getTime()+1000*60*60*24*index_date);
+    
     if (document.getElementById("previous-date").classList == "arrow-disabled")
     {
       flag = true;
     }
     
-    for (var i = 1 ; i <= number_of_users ; i++)
-    {
-      document.getElementById("schedule"+i.toString()).setAttribute("hidden","true");
-      document.getElementById("LoaderSchedule"+i.toString()).removeAttribute("hidden");
-    }
+    document.getElementById("schedule"+userId).setAttribute("hidden","true");
+    document.getElementById("LoaderSchedule"+userId).removeAttribute("hidden");
+    
     
     document.getElementById("following-date").setAttribute("class","arrow-disabled");
     document.getElementById("following-date").removeAttribute("onclick");
 
     document.getElementById("previous-date").setAttribute("class","arrow-disabled");
     document.getElementById("previous-date").removeAttribute("onclick");
-    
+   
     google.script.run.withSuccessHandler((schedule)=>
     {
       list_events[list_events.length] = schedule;
-    
       document.getElementById("schedule-date").innerHTML = (new_date.getMonth()+1).toString()+"月"+new_date.getDate() +"日";
-      
-      for (var i = 0 ; i < schedule.length ; i++)
+      document.getElementById("schedule"+userId).removeAttribute("hidden");
+      document.getElementById("LoaderSchedule"+userId).setAttribute("hidden","true");
+
+      if ( schedule.toString().trim() == "?Check permissions" )
       {
-        document.getElementById("schedule"+(i+1).toString()).removeAttribute("hidden");
-        document.getElementById("LoaderSchedule"+(i+1).toString()).setAttribute("hidden","true");
-        
-        // document.getElementById("schedule"+(i+1).toString()).innerHTML = schedule[i].toString().replace(/\n/g,"<br>");
-
-        if ( schedule[i].toString().trim() == "?Check permissions" )
-        {
-          if ( (i+1) == userId || email_current_user == owner)
-          {
-            document.getElementById("schedule"+(i+1).toString()).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
-            document.getElementById("schedule"+(i+1).toString()).setAttribute("style","color:red;");
-          }
-          else
-          {
-            document.getElementById("schedule"+(i+1).toString()).innerHTML = "";
-          }
-        }
-        else
-        {
-          document.getElementById("schedule"+(i+1).toString()).innerHTML = schedule[i].toString().replace(/\n/g,"<br>");
-        }  
-
-        if (!flag)
-        {
-          document.getElementById("previous-date").setAttribute("class","arrow");
-          document.getElementById("previous-date").setAttribute("onclick","previous_date()");
-        }
-        document.getElementById("following-date").setAttribute("class","arrow");
-        document.getElementById("following-date").setAttribute("onclick","following_date()");
-      
+          document.getElementById("schedule"+userId).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+          document.getElementById("schedule"+userId).setAttribute("style","color:red;");
       }
-    }).read_new_date(index_date);
+      else
+      {
+        document.getElementById("schedule"+userId).innerHTML = schedule.toString().replace(/\n/g,"<br>");
+      }  
+
+      if (!flag)
+      {
+        document.getElementById("previous-date").setAttribute("class","arrow");
+        document.getElementById("previous-date").setAttribute("onclick","previous_date()");
+      }
+      
+      document.getElementById("following-date").setAttribute("class","arrow");
+      document.getElementById("following-date").setAttribute("onclick","following_date()");
+      
+      
+    }).read_new_date_oneself(index_date,userId);
   }
+  
 
   function popup_booking()
   {
     var d = new Date();
     var day = parseInt(d.getDate());
     var month = parseInt(d.getMonth()+1);
-    var id_current_user = document.getElementById("userId").innerHTML; 
+    var id_current_user = userId; 
 
     set_category_time0();
 
@@ -765,12 +766,10 @@
     
     google.script.run.withSuccessHandler((msg_flags)=>
     { 
-      var userId = document.getElementById("userId").innerHTML;
       for (var i = 0 ; i<msg_flags.length ; i++)
       { 
         if (msg_flags[i]!=0)
         { 
-          // name_aux = document.getElementById("name"+(i+1).toString()).innerHTML;
           name_aux = list_name[i] +' '+'<i class="material-icons">message</i>';
           document.getElementById("name"+(i+1).toString()).innerHTML = name_aux;
           if (userId == i+1)
@@ -808,7 +807,6 @@
 
   function set_category_time0()
   {
-    var userId = document.getElementById("userId").innerHTML;
     var calendar_date_string = document.getElementById("Date"+userId).value;
 
     if (calendar_date_string=="")
@@ -886,7 +884,6 @@
 
   function open_message()
   {
-    var userId = document.getElementById("userId").innerHTML;
     window.open(email_address_inbox);
     document.getElementById("name"+userId).removeAttribute("style");
     document.getElementById("name"+userId).removeAttribute("onclick");
@@ -896,7 +893,6 @@
 
   function popup_modification()
   {
-    var userId = document.getElementById("userId").innerHTML;
     var value_status = document.getElementById("noteT"+userId).innerHTML;
     
     document.getElementById("note"+userId).innerHTML = value_status.trim();
@@ -916,24 +912,6 @@
       modalM.style.display = "none";
     }
   }
-
-  //  function popup_new_user()
-  // {
-  //   var modalN = document.getElementById("New_User");
-  //   modalN.style.display = "block";
-  //   popup_close_new_user();
-  // }
-
-  // function popup_close_new_user()
-  // {
-  //   var spanN = document.getElementsByClassName("close_popup")[3];
-  //   var modalN = document.getElementById("New_User");
-
-  //   spanN.onclick = function() 
-  //   {
-  //     modalN.style.display = "none";
-  //   }
-  // }
 
   function id_from_string(len_stem, str)
   {
@@ -968,7 +946,6 @@
           document.getElementById("name"+i.toString()).innerHTML = data.data[i-1][0];
           document.getElementById("statusT"+i.toString()).innerHTML = data.data[i-1][1];
           document.getElementById("noteT"+i.toString()).innerHTML = data.data[i-1][2];
-          // alert(data.data.length)
         }
         
         set_colors_status();
@@ -976,16 +953,37 @@
         alert_msg();
       }
     ).data_from_ss()
-  }
+  } 
 
-  function retrieve_calendar10()
+  function load_schedule(str)
   {
-    google.script.run.withSuccessHandler((x)=>
-    {
-      list_events = x;
-      alert(list_events)
-    }
-    ).read_ss_calendars();
-  }  
+    var this_id = id_from_string("schedule".length, str);
+    document.getElementById(str).setAttribute("hidden","");
+    document.getElementById("LoaderSchedule"+this_id).removeAttribute("hidden");
+    google.script.run.withSuccessHandler((schedule)=>
+      {
+        if ( schedule.toString().trim() == "?Check permissions" )
+        {
+          if (owner == email_current_user)
+          {
+            document.getElementById(str).innerHTML = '<i class="material-icons">warning</i><br> '+" カレンダーは読み込めません。アクセス権限を確認してくだい。";
+            document.getElementById(str).setAttribute("style","color:red;");
+          }
+          else
+          {
+            document.getElementById(str).innerHTML = "";
+          }
+        }
+        else
+        {
+          document.getElementById(str).innerHTML = schedule.toString().replace(/\n/g,"<br>");
+        } 
+       
+
+        document.getElementById(str).removeAttribute("hidden");
+        document.getElementById("LoaderSchedule"+this_id).setAttribute("hidden","");
+      }
+    ).read_calendar_date_oneself(this_id);
+  }
 
 </script>

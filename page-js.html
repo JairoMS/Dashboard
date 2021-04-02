@@ -9,7 +9,9 @@
   var list_time = [];
   var interval = [];
   var userId = document.getElementById("userId").innerHTML; 
+
   console.log(userId)
+
   var flag_category = false;
   var flag_category2 = false;
   var list_name = [];
@@ -17,8 +19,10 @@
   var email_current_user = "";
   const owner = "morita@silk.co.jp";
 
+
   let all_schedule_button=document.getElementById('all-schedule')
   all_schedule_button.onclick=load_all_schedules
+
 
   function create_list_names()
   {
@@ -88,9 +92,11 @@
 
   function load_schedule_info_oneself()
   {
+
     
     var userId = document.getElementById("userId").innerHTML; 
     console.log(userId)
+
     google.script.run.withSuccessHandler((x)=>
     {
       list_events[0] = x;
@@ -146,6 +152,7 @@
 
   function save_booking(buttonId)
   {
+
     var current_time = new Date();
     var bookingInfo = {};
     
@@ -199,12 +206,31 @@
       }
       document.getElementById("saveBooking"+ id_num).removeAttribute("disabled");
       document.getElementById("saveBooking"+ id_num).setAttribute("class","button button1");
-      display_booking(id_num);
+
+      if (document.getElementById("choose_room").value == "room1")
+      {
+        // alert(document.getElementById("choose_room").value)
+        document.getElementById("shown_calendar2").setAttribute("hidden","");
+        document.getElementById("shown_calendar1").removeAttribute("hidden");
+        var icon_id = "icon1";
+      }
+      else
+      {
+        document.getElementById("shown_calendar1").setAttribute("hidden","");
+        document.getElementById("shown_calendar2").removeAttribute("hidden");
+        var icon_id = "icon2";
+      }
+
+      // display_booking(id_num);
+      display_booking(id_num,icon_id);
+      set_booking_info(icon_id);
+
     })
     .withFailureHandler((e)=>{
       document.getElementById("alert_calendar"+ id_num).innerHTML = "予約時間ご利用いただけません";
     })
-    .saveBooking(bookingInfo);
+    .saveBooking(bookingInfo, document.getElementById("choose_room").value);
+
     
   }
 
@@ -212,6 +238,15 @@
   { 
     var close = document.getElementsByClassName("close");
     var delete_items = {};
+
+    if (document.getElementById("shown_calendar1").hidden == false)
+    {
+      var icon_id = "icon1";
+    }
+    else
+    {
+      var icon_id = "icon2";
+    }
 
     var id_num = id_from_string(13, buttonId); // 13 is the length of the stem of the id "id="stem##"
     delete_items.row = id_num;
@@ -244,14 +279,26 @@
       document.getElementById("Loader"+ id_num).setAttribute("hidden","true");
       document.getElementById("deleteBooking"+ id_num).setAttribute("hidden","");
 
-      display_booking(id_num);
+      display_booking(id_num,icon_id);
+      set_booking_info(icon_id);
     }
-    ).deleteBooking(delete_items);
+    ).deleteBooking(delete_items,icon_id);
   }
 
-  function display_booking(userId)
+  function display_booking(userId, icon_id="icon1")
   {
-    userId = userId.toString();
+    if (icon_id == "icon1")
+    {
+      var name_shown_cal = "shown_icon_calendar1";
+    }
+    else
+    {
+      var name_shown_cal = "shown_icon_calendar2"
+    }
+
+    document.getElementById(name_shown_cal).setAttribute("class","arrow-disabled");
+    // userId = userId.toString();
+    document.getElementById("List"+ userId).setAttribute("hidden","true");
     document.getElementById("Loader"+ userId).removeAttribute("hidden");
 
     google.script.run.withSuccessHandler((listBooking)=>
@@ -283,8 +330,9 @@
         
       }
       create_close_button();
+      // document.getElementById(name_shown_cal).setAttribute("class","arrow");
     }
-    ).read_booking_active_user(userId);
+    ).read_booking_active_user(userId,icon_id);
   }
 
   // Create a "close" button and append it to each list item
@@ -368,7 +416,7 @@
         document.getElementById("name_of_user").innerHTML = user.name;
         email_current_user = user.email;
         display_booking(userId);
-        set_booking_info();
+        set_booking_info("icon1");
       }
     ).active_user();
     
@@ -381,16 +429,27 @@
     
   };
 
-  function set_booking_info() 
+  function set_booking_info(icon_id) 
   {
+    if (icon_id == "icon1")
+    {
+      var name_shown_cal = "shown_icon_calendar1";
+    }
+    else
+    {
+      var name_shown_cal = "shown_icon_calendar2"
+    }
+
     google.script.run.withSuccessHandler((data)=>
       {
         for (var i = 1 ; i<data.length ; i++)
         {
           document.getElementById("calendarT"+i.toString()).innerHTML = data[i-1];
         }
+        document.getElementById(name_shown_cal).setAttribute("class","arrow");
+        document.getElementById("Loader"+ userId).setAttribute("hidden","true");
       }
-    ).read_booking();
+    ).read_booking(icon_id);
   }
 
   function set_colors_status()
@@ -412,7 +471,7 @@
       }
     }
   }
-
+  
   function refresh_data() 
   {
     setInterval( function() 
@@ -451,7 +510,7 @@
           }
         }
       ).readInfoRefresh()
-    }, 1000*60); // 1000 ms * (60 seconds) * (desired minutes)
+    }, 1000*60*10); // 1000 ms * (60 seconds) * (desired minutes)
   } 
   
   // This functions makes the popup (message) appear
@@ -965,6 +1024,8 @@
   {
     var this_id = id_from_string("schedule".length, str);
     document.getElementById(str).setAttribute("hidden","");
+    document.getElementById(str).removeAttribute("onclick")
+
     document.getElementById("LoaderSchedule"+this_id).removeAttribute("hidden");
     google.script.run.withSuccessHandler((schedule)=>
       {
@@ -984,13 +1045,31 @@
         {
           document.getElementById(str).innerHTML = schedule.toString().replace(/\n/g,"<br>");
         } 
-       
-
         document.getElementById(str).removeAttribute("hidden");
         document.getElementById("LoaderSchedule"+this_id).setAttribute("hidden","");
       }
     ).read_calendar_date_oneself(this_id);
   }
+
+
+  function toggle_icon(id_icon) 
+  {
+    if (id_icon == "shown_icon_calendar1")
+    {
+      document.getElementById("shown_calendar1").setAttribute("hidden","");
+      document.getElementById("shown_calendar2").removeAttribute("hidden");
+      var icon_id = "icon2";
+    }
+    else
+    {
+      document.getElementById("shown_calendar2").setAttribute("hidden","");
+      document.getElementById("shown_calendar1").removeAttribute("hidden");
+      var icon_id = "icon1";
+    }
+
+    set_booking_info(icon_id);
+    display_booking(userId,icon_id);
+    
 
   function load_all_schedules(event){
     for(let i=0;i<Number(number_of_users);i++){
@@ -1041,6 +1120,7 @@
     ).read_weekly_calendar_ss();
         
     //console.log(`${event.target.id} pressed`)
+
   }
 
 </script>
